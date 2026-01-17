@@ -15,7 +15,7 @@ const io = new Server(httpServer, {
     maxHttpBufferSize: 1e7 // 10 MB for large images
 });
 
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 const rooms = new Map();
 
 io.on('connection', (socket) => {

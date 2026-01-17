@@ -6,9 +6,9 @@
 
 2. **Create New Web Service**:
    - Connect your GitHub repo
-   - Root Directory: `server`
+   - Root Directory: `.` (Leave blank or set to current dir)
    - Build Command: `npm install`
-   - Start Command: `node index.js`
+   - Start Command: `node server/index.js`
    - Instance Type: Free
 
 3. **After deployment**, copy the URL (e.g., `https://clash-of-minds-server.onrender.com`)
