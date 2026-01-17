@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { GameState, GameStatus, MissedQuestion } from '../types';
 import { ProgressBar } from './ProgressBar';
 import { TransparentImage } from './TransparentImage';
-import { StarIcon, XMarkIcon, CheckIcon, SparklesIcon, SpeakerWaveIcon, MicrophoneIcon, LightBulbIcon } from '@heroicons/react/24/solid';
+import { StarIcon, XMarkIcon, CheckIcon, SparklesIcon, SpeakerWaveIcon, MicrophoneIcon, LightBulbIcon, BookOpenIcon, FireIcon, ClipboardDocumentListIcon, BoltIcon, ShieldCheckIcon, FaceFrownIcon } from '@heroicons/react/24/solid';
+import { Brain, Scroll } from 'lucide-react';
 import { useSoundManager } from '../hooks/useSoundManager';
 import { ScholarReport } from './ScholarReport';
 import { generateMnemonic, speakLikeBoss, getWisdom } from '../services/geminiService';
@@ -653,13 +654,13 @@ export const GameScreen: React.FC<GameScreenProps> = ({
           <div className="flex items-center gap-2 md:gap-3 flex-wrap justify-center">
             {/* Topic Title */}
             <div className="bg-black/60 backdrop-blur-md rounded-2xl px-3 py-2 md:px-4 md:py-2.5 shadow-lg border border-white/10 flex items-center gap-2 max-w-[140px] md:max-w-[200px]">
-              <span className="text-purple-400 text-lg">📚</span>
+              <BookOpenIcon className="w-5 h-5 text-purple-400" />
               <span className="font-bold text-white/90 text-xs md:text-sm truncate">{gameState.topic_title || 'Study Session'}</span>
             </div>
             {/* Streak */}
             <div className="bg-black/60 backdrop-blur-md rounded-2xl px-3 py-2 md:px-4 md:py-2.5 shadow-lg border border-white/10 flex items-center gap-2">
               <div className="flex items-center gap-1.5">
-                <span className="text-yellow-400 text-lg">🔥</span>
+                <FireIcon className="w-5 h-5 text-yellow-500" />
                 <span className="font-black text-white text-sm md:text-base">{gameState.stats.streak}</span>
               </div>
               <span className="text-white/50 text-[10px] md:text-xs font-bold uppercase hidden sm:block">Streak</span>
@@ -667,7 +668,7 @@ export const GameScreen: React.FC<GameScreenProps> = ({
             {/* Question Progress */}
             <div className="bg-black/60 backdrop-blur-md rounded-2xl px-3 py-2 md:px-4 md:py-2.5 shadow-lg border border-white/10 flex items-center gap-2">
               <div className="flex items-center gap-1.5">
-                <span className="text-sky-400 text-lg">📝</span>
+                <ClipboardDocumentListIcon className="w-5 h-5 text-sky-400" />
                 <span className="font-black text-white text-sm md:text-base">
                   {gameState.stats.current_turn_index + 1}<span className="text-white/50 font-bold">/{gameState.stats.total_turns}</span>
                 </span>
@@ -677,7 +678,7 @@ export const GameScreen: React.FC<GameScreenProps> = ({
 
             {/* Mana Bar */}
             <div className="bg-black/60 backdrop-blur-md rounded-2xl px-3 py-2 md:px-4 md:py-2.5 shadow-lg border border-white/10 flex items-center gap-2 min-w-[100px]">
-              <span className="text-blue-400 text-lg">💧</span>
+              <BoltIcon className="w-5 h-5 text-blue-400" />
               <div className="flex-1 min-w-[60px]">
                 <div className="h-2 bg-blue-900/50 rounded-full overflow-hidden">
                   <div
@@ -701,7 +702,7 @@ export const GameScreen: React.FC<GameScreenProps> = ({
                 title="Shield (30 mana) - Block next damage"
               >
                 <div className="flex items-center gap-1.5">
-                  <span className="text-lg">🛡️</span>
+                  <ShieldCheckIcon className="w-5 h-5 text-purple-200" />
                   <span className="text-white font-bold text-xs hidden md:block">30</span>
                 </div>
                 {gameState.stats.active_powerups.some(p => p.type === 'SHIELD') && (
@@ -784,11 +785,11 @@ export const GameScreen: React.FC<GameScreenProps> = ({
               transition: 'opacity 0.6s ease-out, transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)'
             }}
           >
-            <p className={`text-white font-bold leading-snug md:leading-relaxed text-center transition-all duration-500 ${typewriterComplete ? 'text-xs md:text-xl' : 'text-sm md:text-2xl'}`}>
-              <span className="text-yellow-400/80 mr-1 md:mr-2">✦</span>
+            <p className={`text-white font-bold leading-snug md:leading-relaxed text-center transition-all duration-500 ${typewriterComplete ? 'text-xs md:text-xl' : 'text-sm md:text-2xl'} flex items-center justify-center`}>
+              <SparklesIcon className="w-5 h-5 text-yellow-400/80 mr-1 md:mr-2 inline" />
               <span className="italic">"{typewriterText}"</span>
               {!typewriterComplete && <span className="animate-pulse text-yellow-400">|</span>}
-              <span className="text-yellow-400/80 ml-1 md:ml-2">✦</span>
+              <SparklesIcon className="w-5 h-5 text-yellow-400/80 ml-1 md:ml-2 inline" />
             </p>
           </div>
         </div>
@@ -907,7 +908,7 @@ export const GameScreen: React.FC<GameScreenProps> = ({
               >
                 <div className="bg-black/60 backdrop-blur-sm rounded-lg md:rounded-xl px-3 py-1.5 md:px-4 md:py-2">
                   <span className="text-white text-[10px] md:text-sm lg:text-sm font-black flex items-center gap-1 whitespace-nowrap">
-                    <span className="text-red-400">👹</span>
+                    <FaceFrownIcon className="w-4 h-4 text-red-400" />
                     {displayedBossName}
                   </span>
                 </div>
@@ -946,7 +947,7 @@ export const GameScreen: React.FC<GameScreenProps> = ({
               {/* Mnemonic Forge Card */}
               <div className="bg-purple-50 rounded-xl p-4 mb-6 border-2 border-purple-100 relative overflow-hidden">
                 <div className="flex items-center justify-center gap-2 mb-2">
-                  <span className="text-xl">🧠</span>
+                  <Brain className="w-6 h-6 text-purple-700" />
                   <h4 className="font-extrabold text-purple-700 text-xs tracking-widest uppercase">Memory Anchor</h4>
                 </div>
 
@@ -1023,7 +1024,7 @@ export const GameScreen: React.FC<GameScreenProps> = ({
             </button>
 
             <div className="text-center mt-4 mb-2">
-              <span className="text-4xl block mb-2">📜</span>
+              <Scroll className="w-10 h-10 text-amber-900 mx-auto mb-2" />
               <h3 className="font-serif font-black text-2xl text-amber-900 uppercase tracking-widest">Ancient Wisdom</h3>
             </div>
 
