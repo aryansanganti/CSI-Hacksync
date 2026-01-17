@@ -1239,17 +1239,18 @@ const GameApp: React.FC = () => {
           </div>
         </div>
       ) : view === 'MENU' ? (
-        <div className="relative flex items-start justify-center min-h-screen p-4 overflow-hidden pt-[40vh]">
-          {/* Background Image */}
-          <div className="absolute inset-0 z-0">
+        <div className="relative flex items-start justify-center min-h-screen p-4 overflow-hidden pt-32 md:pt-[35vh]">
+          {/* Background Image - Fixed & Enhanced */}
+          <div className="fixed inset-0 z-0">
+            <div className="absolute inset-0 bg-gradient-to-b from-slate-900/60 via-slate-900/20 to-slate-900/80 z-10" />
             <img
-              src="/background.png"
+              src="/bg.jpeg"
               alt="Background"
-              className="w-full h-full object-cover opacity-100"
+              className="w-full h-full object-cover opacity-100 scale-105"
             />
           </div>
 
-          <div className="relative z-10 w-full max-w-lg">
+          <div className="relative z-10 w-full max-w-lg mx-auto">
 
             {/* Menu Buttons Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
