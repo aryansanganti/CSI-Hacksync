@@ -2,11 +2,9 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { GameState, GameStatus, MissedQuestion } from '../types';
 import { ProgressBar } from './ProgressBar';
 import { TransparentImage } from './TransparentImage';
-import { StarIcon, XMarkIcon, CheckIcon, SparklesIcon, SpeakerWaveIcon, MicrophoneIcon, LightBulbIcon } from '@heroicons/react/24/solid';
+import { StarIcon, XMarkIcon, CheckIcon, SparklesIcon } from '@heroicons/react/24/solid';
 import { useSoundManager } from '../hooks/useSoundManager';
 import { ScholarReport } from './ScholarReport';
-import { generateMnemonic, speakLikeBoss, getWisdom } from '../services/geminiService';
-import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 
 interface GameScreenProps {
   gameState: GameState;
@@ -32,9 +30,10 @@ export const GameScreen: React.FC<GameScreenProps> = ({
   onAction,
   onTransitionComplete,
   onGiveUp,
+  soundManager,
   missedQuestions,
   topicName,
-  contextSummary,
+  contextSummary
   onSaveAndQuit,
   onUsePowerup,
   soundManager
@@ -69,72 +68,6 @@ export const GameScreen: React.FC<GameScreenProps> = ({
   const playerRef = useRef<HTMLDivElement>(null);
   const enemyRef = useRef<HTMLDivElement>(null);
   const [attackDistance, setAttackDistance] = useState<number>(0);
-
-  // Mnemonic Forge State
-  const [mnemonic, setMnemonic] = useState<string | null>(null);
-  const [isForgingMnemonic, setIsForgingMnemonic] = useState(false);
-
-  // Wisdom Scroll State
-  const [isFetchingWisdom, setIsFetchingWisdom] = useState(false);
-  const [showWisdomModal, setShowWisdomModal] = useState(false);
-  const [wisdomHint, setWisdomHint] = useState<string | null>(null);
-
-  // Oracle Mode State
-  const [oracleModeEnabled, setOracleModeEnabled] = useState(false);
-  const { isListening, transcript, startListening, stopListening, hasSupport } = useSpeechRecognition();
-
-  // Oracle Narration
-  useEffect(() => {
-    if (oracleModeEnabled && showQuestion && gameState.current_turn.question && !waitingForTurn) {
-      // Short delay to allow UI to settle
-      const t = setTimeout(() => {
-        speakLikeBoss(gameState.current_turn.question);
-      }, 500);
-      return () => clearTimeout(t);
-    }
-  }, [oracleModeEnabled, showQuestion, gameState.current_turn.question, waitingForTurn]);
-
-  // Voice Command Matching
-  useEffect(() => {
-    if (!transcript || !isListening || isProcessing) return;
-    const clean = transcript.toLowerCase().trim();
-    if (!clean) return;
-
-    console.log("Voice Input:", clean);
-
-    // Helper to trigger action
-    const trigger = (ans: string) => {
-      handleAction(ans);
-      stopListening();
-    };
-
-    // Check Options
-    const options = gameState.current_turn.options || [];
-    // 1. Direct match
-    const directMatch = options.find(o => clean.includes(o.toLowerCase()));
-    if (directMatch) { trigger(directMatch); return; }
-
-    // 2. "Option A/B/C" logic
-    if (gameState.current_turn.challenge_type === 'MULTIPLE_CHOICE' && options.length > 0) {
-      const labels = ['a', 'b', 'c', 'd'];
-      // Matches "Option A", "Option B", or just "A", "B" (case insensitive due to clean)
-      const match = clean.match(/^(?:option\s+)?([a-d])$/);
-      if (match) {
-        const idx = labels.indexOf(match[1]);
-        if (idx !== -1 && idx < options.length) {
-          trigger(options[idx]);
-          return;
-        }
-      }
-    }
-
-    // 3. True/False
-    if (gameState.current_turn.challenge_type === 'TRUE_FALSE') {
-      if (clean.includes('true')) trigger('TRUE');
-      else if (clean.includes('false')) trigger('FALSE');
-    }
-
-  }, [transcript, isListening, gameState.current_turn, isProcessing]);
 
   // Track all active timeouts so we can clear them on unmount
   const activeTimeouts = useRef<ReturnType<typeof setTimeout>[]>([]);
@@ -271,25 +204,6 @@ export const GameScreen: React.FC<GameScreenProps> = ({
     }
   }, [gameState.game_status, soundManager]);
 
-  const handleWisdomScroll = async () => {
-    soundManager.playButtonClick();
-    if (wisdomHint) {
-      setShowWisdomModal(true);
-      return;
-    }
-
-    setIsFetchingWisdom(true);
-    try {
-      const hint = await getWisdom(gameState.current_turn.question, contextSummary);
-      setWisdomHint(hint);
-      setShowWisdomModal(true);
-    } catch (e) {
-      console.error("Wisdom Error", e);
-    } finally {
-      setIsFetchingWisdom(false);
-    }
-  };
-
   const handleAction = async (answer: string) => {
     if (isProcessing) return;
     setIsProcessing(true);
@@ -392,7 +306,6 @@ export const GameScreen: React.FC<GameScreenProps> = ({
         }, 1400);
         // Show explanation after battle animation completes
         safeTimeout(() => {
-          forgeMnemonic(answer);
           setShowExplanation(true);
         }, 2400);
       }, 1500); // 1.5s delay to show red feedback (matches correct answer timing)
@@ -517,26 +430,6 @@ export const GameScreen: React.FC<GameScreenProps> = ({
     );
   };
 
-  // Mnemonic Forge Logic
-  const forgeMnemonic = async (wrongAnswer: string) => {
-    if (!gameState) return;
-    setIsForgingMnemonic(true);
-    setMnemonic(null);
-    try {
-      const result = await generateMnemonic(
-        gameState.current_turn.question,
-        gameState.current_turn.correct_answer || "Unknown",
-        topicName || "General Knowledge",
-        wrongAnswer
-      );
-      setMnemonic(result);
-    } catch (error) {
-      console.error("Failed to forge mnemonic", error);
-    } finally {
-      setIsForgingMnemonic(false);
-    }
-  };
-
   // End Game Screen
   if (gameState.game_status !== GameStatus.PLAYING) {
     const isWin = gameState.game_status === GameStatus.WON;
@@ -585,8 +478,6 @@ export const GameScreen: React.FC<GameScreenProps> = ({
               </div>
             </div>
 
-
-
             {/* Buttons */}
             <div className="space-y-3">
               {missedQuestions.length > 0 && !showScholarReport && (
@@ -609,20 +500,18 @@ export const GameScreen: React.FC<GameScreenProps> = ({
         </div>
 
         {/* Scholar's Report Overlay */}
-        {
-          showScholarReport && (
-            <ScholarReport
-              topicName={topicName}
-              contextSummary={contextSummary}
-              missedQuestions={missedQuestions}
-              totalQuestions={gameState.stats.total_turns}
-              correctAnswers={gameState.stats.turns_won}
-              onClose={() => { setShowScholarReport(false); onGiveUp(); }}
-              soundManager={soundManager}
-            />
-          )
-        }
-      </div >
+        {showScholarReport && (
+          <ScholarReport
+            topicName={topicName}
+            contextSummary={contextSummary}
+            missedQuestions={missedQuestions}
+            totalQuestions={gameState.stats.total_turns}
+            correctAnswers={gameState.stats.turns_won}
+            onClose={() => { setShowScholarReport(false); onGiveUp(); }}
+            soundManager={soundManager}
+          />
+        )}
+      </div>
     );
   }
 
@@ -650,7 +539,7 @@ export const GameScreen: React.FC<GameScreenProps> = ({
       <div className="absolute top-0 left-0 right-0 z-50 p-3 md:p-4">
         <div className="max-w-5xl mx-auto flex justify-center items-center">
           {/* Centered HUD Container */}
-          <div className="flex items-center gap-2 md:gap-3 flex-wrap justify-center">
+          <div className="flex items-center gap-2 md:gap-3">
             {/* Topic Title */}
             <div className="bg-black/60 backdrop-blur-md rounded-2xl px-3 py-2 md:px-4 md:py-2.5 shadow-lg border border-white/10 flex items-center gap-2 max-w-[140px] md:max-w-[200px]">
               <span className="text-purple-400 text-lg">📚</span>
@@ -709,38 +598,6 @@ export const GameScreen: React.FC<GameScreenProps> = ({
                 )}
               </button>
             )}
-            {/* Oracle Mode Toggle */}
-            <button
-              onClick={() => {
-                soundManager.playButtonClick();
-                setOracleModeEnabled(!oracleModeEnabled);
-                if (oracleModeEnabled) window.speechSynthesis.cancel();
-              }}
-              className={`bg-black/60 backdrop-blur-md rounded-2xl p-2.5 shadow-lg border transition-all group ${oracleModeEnabled ? 'border-purple-400 bg-purple-900/40' : 'border-white/10 hover:bg-white/10'}`}
-              title={oracleModeEnabled ? "Disable Oracle Mode" : "Enable Oracle Mode (Voice)"}
-            >
-              {oracleModeEnabled ? (
-                <SpeakerWaveIcon className="w-5 h-5 text-purple-400 animate-pulse" />
-              ) : (
-                <SpeakerWaveIcon className="w-5 h-5 text-white/50 group-hover:text-white" />
-              )}
-            </button>
-
-            {/* Wisdom Scroll Button */}
-            <button
-              onClick={handleWisdomScroll}
-              disabled={isFetchingWisdom || showWisdomModal}
-              className={`
-                bg-amber-500/80 backdrop-blur-md rounded-2xl p-2.5 shadow-lg border border-amber-300/30 
-                hover:bg-amber-400 transition-all group relative overflow-hidden
-                ${isFetchingWisdom ? 'animate-pulse cursor-wait' : ''}
-              `}
-              title="Use Wisdom Scroll (Get a Hint)"
-            >
-              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
-              <LightBulbIcon className={`w-5 h-5 text-white ${isFetchingWisdom ? 'animate-bounce' : 'group-hover:scale-110 transition-transform'}`} />
-            </button>
-
             {/* Give Up */}
             <button
               onClick={() => { soundManager.playButtonClick(); onGiveUp(); }}
@@ -760,8 +617,20 @@ export const GameScreen: React.FC<GameScreenProps> = ({
               </button>
             )}
 
-
-
+            {/* Wisdom Scroll Button */}
+            <button
+              onClick={handleWisdomScroll}
+              disabled={isFetchingWisdom || showWisdomModal}
+              className={`
+                bg-amber-500/80 backdrop-blur-md rounded-2xl p-2.5 shadow-lg border border-amber-300/30 
+                hover:bg-amber-400 transition-all group relative overflow-hidden
+                ${isFetchingWisdom ? 'animate-pulse cursor-wait' : ''}
+              `}
+              title="Use Wisdom Scroll (Get a Hint)"
+            >
+              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
+              <LightBulbIcon className={`w-5 h-5 text-white ${isFetchingWisdom ? 'animate-bounce' : 'group-hover:scale-110 transition-transform'}`} />
+            </button>
           </div>
         </div>
       </div>
@@ -806,45 +675,16 @@ export const GameScreen: React.FC<GameScreenProps> = ({
             }}
           >
             {/* Question */}
-            <div className="p-4 md:p-6 lg:p-8 relative">
+            <div className="p-4 md:p-6 lg:p-8">
               <p className="text-slate-400 text-[10px] md:text-xs lg:text-sm font-bold uppercase tracking-widest mb-1 md:mb-2 text-center">
                 Question {gameState.stats.current_turn_index + 1}
               </p>
-              <h2 className="text-slate-800 font-black text-sm md:text-lg lg:text-xl leading-snug md:leading-relaxed text-center mb-3 md:mb-5 lg:mb-6 flex items-center justify-center gap-2">
+              <h2 className="text-slate-800 font-black text-sm md:text-lg lg:text-xl leading-snug md:leading-relaxed text-center mb-3 md:mb-5 lg:mb-6">
                 {gameState.current_turn.question}
-                {oracleModeEnabled && (
-                  <button
-                    onClick={() => speakLikeBoss(gameState.current_turn.question)}
-                    className="p-1 rounded-full hover:bg-slate-100 text-purple-500"
-                  >
-                    <SpeakerWaveIcon className="w-4 h-4" />
-                  </button>
-                )}
               </h2>
 
               {/* Answers */}
               {renderAnswers()}
-
-              {/* Voice Input Indicator (Floating or centered) */}
-              {oracleModeEnabled && (
-                <div className="flex justify-center mt-4">
-                  <button
-                    onMouseDown={(e) => { e.preventDefault(); startListening(); }}
-                    onMouseUp={(e) => { e.preventDefault(); stopListening(); }}
-                    onMouseLeave={(e) => { e.preventDefault(); stopListening(); }}
-                    onTouchStart={(e) => { e.preventDefault(); startListening(); }}
-                    onTouchEnd={(e) => { e.preventDefault(); stopListening(); }}
-                    onClick={(e) => e.preventDefault()}
-                    className={`
-                        flex items-center gap-2 px-4 py-2 rounded-full font-bold text-xs uppercase tracking-widest transition-all select-none touch-none
-                        ${isListening ? 'bg-red-500 text-white animate-pulse shadow-red-500/50 shadow-lg scale-105' : 'bg-slate-100 text-slate-500 hover:bg-slate-200 active:scale-95'}
-                      `}
-                  >
-                    <MicrophoneIcon className="w-4 h-4" />
-                    {isListening ? (transcript || "Listening...") : "Hold to Speak"}
-                  </button>
-                </div>
-              )}
             </div>
           </div>
         </div>
@@ -942,32 +782,6 @@ export const GameScreen: React.FC<GameScreenProps> = ({
                   {gameState.current_turn.answer_explanation}
                 </p>
               )}
-
-              {/* Mnemonic Forge Card */}
-              <div className="bg-purple-50 rounded-xl p-4 mb-6 border-2 border-purple-100 relative overflow-hidden">
-                <div className="flex items-center justify-center gap-2 mb-2">
-                  <span className="text-xl">🧠</span>
-                  <h4 className="font-extrabold text-purple-700 text-xs tracking-widest uppercase">Memory Anchor</h4>
-                </div>
-
-                {isForgingMnemonic ? (
-                  <div className="flex flex-col items-center py-2 space-y-2">
-                    <SparklesIcon className="w-6 h-6 text-purple-400 animate-spin" />
-                    <p className="text-xs font-bold text-purple-400 animate-pulse">Forging Brain Hack...</p>
-                  </div>
-                ) : mnemonic ? (
-                  <div className="relative z-10 animate-fadeScale">
-                    <p className="text-purple-900 font-bold italic text-sm leading-relaxed">
-                      "{mnemonic}"
-                    </p>
-                  </div>
-                ) : (
-                  <p className="text-xs text-purple-300">Could not forge mnemonic.</p>
-                )}
-
-                {/* Decorative background sparkle */}
-                <SparklesIcon className="absolute -bottom-4 -right-4 w-20 h-20 text-purple-200/50 rotate-12" />
-              </div>
               <button
                 onClick={() => { soundManager.playButtonClick(); dismissExplanation(); }}
                 className="w-full py-4 bg-gradient-to-br from-sky-400 to-sky-500 hover:from-sky-300 hover:to-sky-400 text-white border-b-4 border-sky-600 rounded-2xl font-black text-lg uppercase tracking-wide shadow-lg transition-all active:border-b-0 active:translate-y-1"
@@ -983,13 +797,6 @@ export const GameScreen: React.FC<GameScreenProps> = ({
         @keyframes float {
           0%, 100% { transform: translateY(0); }
           50% { transform: translateY(-8px); }
-        }
-        @keyframes fadeScale {
-          0% { opacity: 0; transform: scale(0.9); }
-          100% { opacity: 1; transform: scale(1); }
-        }
-        .animate-fadeScale {
-          animation: fadeScale 0.5s ease-out forwards;
         }
         @keyframes shake {
           0%, 100% { transform: translateX(0); }
@@ -1007,42 +814,6 @@ export const GameScreen: React.FC<GameScreenProps> = ({
           animation: shake 0.7s ease-in-out;
         }
       `}</style>
-      {/* Wisdom Scroll Modal */}
-      {showWisdomModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-amber-100 rounded-[2rem] p-8 max-w-sm w-full shadow-2xl border-[6px] border-amber-800/80 relative rotate-1">
-            {/* Scroll Decoration */}
-            <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-32 h-8 bg-amber-900 rounded-full shadow-lg border-2 border-amber-700" />
-            <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 w-32 h-8 bg-amber-900 rounded-full shadow-lg border-2 border-amber-700" />
-
-            <button
-              onClick={() => setShowWisdomModal(false)}
-              className="absolute top-4 right-4 text-amber-900/50 hover:text-amber-900"
-            >
-              <XMarkIcon className="w-8 h-8" />
-            </button>
-
-            <div className="text-center mt-4 mb-2">
-              <span className="text-4xl block mb-2">📜</span>
-              <h3 className="font-serif font-black text-2xl text-amber-900 uppercase tracking-widest">Ancient Wisdom</h3>
-            </div>
-
-            <div className="bg-amber-50 p-6 rounded-xl border-2 border-amber-900/10 min-h-[120px] flex items-center justify-center">
-              <p className="font-serif text-xl text-amber-900 italic text-center font-bold leading-relaxed">
-                "{wisdomHint || "Focus on the question..."}"
-              </p>
-            </div>
-
-            <button
-              onClick={() => setShowWisdomModal(false)}
-              className="w-full mt-6 py-3 bg-amber-800 hover:bg-amber-900 text-amber-100 font-bold rounded-xl shadow-lg transition-all active:scale-95 text-lg uppercase tracking-wide border-b-4 border-amber-950"
-            >
-              Thank you, Sage
-            </button>
-          </div>
-        </div>
-      )}
-
     </div >
   );
 };
