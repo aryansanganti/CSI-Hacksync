@@ -1125,21 +1125,18 @@ const GameApp: React.FC = () => {
 
         <div className="relative flex flex-col justify-end min-h-screen p-4 overflow-hidden pb-4">
           {/* Background Image - Fixed & Enhanced */}
-          <div className="fixed inset-0 z-0">
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/40 to-slate-900/40 z-10" />
+          <div className="fixed inset-0 z-0 bg-slate-900">
+            <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-slate-900 via-slate-900/90 to-transparent backdrop-blur-[2px] z-10" />
             <img
               src="/bg.jpg"
               alt="Background"
-              className="w-full h-full object-cover object-[center_25%] opacity-100 scale-100"
+              className="w-full h-full object-contain md:object-cover object-top md:object-[center_25%] opacity-100 scale-100"
             />
           </div>
 
           <div className="relative z-10 w-full max-w-lg mx-auto">
 
-            {/* Menu Buttons Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-              {/* Classic Mode - Occupies full width on mobile, half on desktop */}
-            </div>
+
 
             <div className="p-2 relative transition-all duration-300 ease-out">
               {/* FIXED SIDEBAR - TOP RIGHT TOGGLEABLE */}
@@ -1147,19 +1144,19 @@ const GameApp: React.FC = () => {
               {/* Toggle Button */}
               <button
                 onClick={() => { soundManager.playButtonClick(); setIsSidebarOpen(!isSidebarOpen); }}
-                className={`fixed top-4 right-4 z-[60] p-3 rounded-xl shadow-lg border-b-4 transition-all active:scale-95 active:border-b-0 active:translate-y-1 bg-black/20 text-white border-white/10 hover:bg-black/40 backdrop-blur-md hover:text-white hover:border-white/30`}
+                className={`md:hidden fixed top-4 right-4 z-[60] p-3 rounded-xl shadow-lg border-b-4 transition-all active:scale-95 active:border-b-0 active:translate-y-1 bg-black/20 text-white border-white/10 hover:bg-black/40 backdrop-blur-md hover:text-white hover:border-white/30`}
               >
                 {isSidebarOpen ? <XMarkIcon className="w-6 h-6" /> : <Bars3Icon className="w-6 h-6" />}
               </button>
 
               {/* Sidebar Content */}
-              <div className={`fixed top-20 right-4 z-50 flex flex-col gap-3 transition-all duration-300 origin-top-right ${isSidebarOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-90 pointer-events-none'}`}>
+              <div className={`fixed top-20 right-4 z-50 flex flex-col md:flex-row md:top-4 md:right-4 md:gap-2 gap-3 transition-all duration-300 origin-top-right ${isSidebarOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-90 pointer-events-none md:opacity-100 md:scale-100 md:pointer-events-auto'}`}>
                 {/* Sound Toggle */}
                 <button
                   onClick={() => { soundManager.playButtonClick(); soundManager.toggleSound(); }}
                   className="group relative flex items-center justify-end"
                 >
-                  <span className="absolute right-14 bg-black/80 text-white text-xs font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none backdrop-blur-sm border border-white/10">
+                  <span className="absolute right-14 md:right-auto md:left-1/2 md:-translate-x-1/2 md:top-14 bg-black/80 text-white text-xs font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none backdrop-blur-sm border border-white/10 z-[70]">
                     {soundManager.isSoundEnabled ? 'Mute Sound' : 'Enable Sound'}
                   </span>
                   <div className={`p-3 rounded-xl shadow-lg border-b-4 transition-all active:scale-95 active:border-b-0 active:translate-y-1 backdrop-blur-md border-white/5 ${soundManager.isSoundEnabled ? 'bg-black/40 text-green-400 hover:text-green-300 hover:bg-black/60' : 'bg-black/20 text-slate-500 hover:bg-black/30'}`}>
@@ -1167,14 +1164,14 @@ const GameApp: React.FC = () => {
                   </div>
                 </button>
 
-                <div className="h-px w-8 bg-white/20 mx-auto my-1" />
+                <div className="h-px w-8 md:w-px md:h-8 bg-white/20 mx-auto md:mx-0 my-1 md:my-auto" />
 
                 {/* Quests */}
                 <button
                   onClick={() => { soundManager.playButtonClick(); setShowQuests(true); setShowSettings(false); setShowMenu(false); setIsSidebarOpen(false); }}
                   className="group relative flex items-center justify-end"
                 >
-                  <span className="absolute right-14 bg-black/80 text-white text-xs font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none backdrop-blur-sm border border-white/10">Quests</span>
+                  <span className="absolute right-14 md:right-auto md:left-1/2 md:-translate-x-1/2 md:top-14 bg-black/80 text-white text-xs font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none backdrop-blur-sm border border-white/10 z-[70]">Quests</span>
                   <div className="p-3 bg-black/40 hover:bg-black/60 text-white/70 hover:text-purple-400 rounded-xl shadow-lg border-b-4 border-white/5 hover:border-purple-500/30 transition-all active:scale-95 active:border-b-0 active:translate-y-1 backdrop-blur-md">
                     <FireIcon className="w-6 h-6" />
                   </div>
@@ -1185,7 +1182,7 @@ const GameApp: React.FC = () => {
                   onClick={() => { soundManager.playButtonClick(); setShowGrimoire(true); setShowSettings(false); setShowMenu(false); setIsSidebarOpen(false); }}
                   className="group relative flex items-center justify-end"
                 >
-                  <span className="absolute right-14 bg-black/80 text-white text-xs font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none backdrop-blur-sm border border-white/10">Grimoire</span>
+                  <span className="absolute right-14 md:right-auto md:left-1/2 md:-translate-x-1/2 md:top-14 bg-black/80 text-white text-xs font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none backdrop-blur-sm border border-white/10 z-[70]">Grimoire</span>
                   <div className="p-3 bg-black/40 hover:bg-black/60 text-white/70 hover:text-indigo-400 rounded-xl shadow-lg border-b-4 border-white/5 hover:border-indigo-500/30 transition-all active:scale-95 active:border-b-0 active:translate-y-1 backdrop-blur-md">
                     <BookOpenIcon className="w-6 h-6" />
                   </div>
@@ -1205,7 +1202,7 @@ const GameApp: React.FC = () => {
                   }}
                   className="group relative flex items-center justify-end"
                 >
-                  <span className="absolute right-14 bg-black/80 text-white text-xs font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none backdrop-blur-sm border border-white/10">Offline</span>
+                  <span className="absolute right-14 md:right-auto md:left-1/2 md:-translate-x-1/2 md:top-14 bg-black/80 text-white text-xs font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none backdrop-blur-sm border border-white/10 z-[70]">Offline</span>
                   <div className="p-3 bg-black/40 hover:bg-black/60 text-white/70 hover:text-sky-400 rounded-xl shadow-lg border-b-4 border-white/5 hover:border-sky-500/30 transition-all active:scale-95 active:border-b-0 active:translate-y-1 backdrop-blur-md">
                     <WifiIcon className="w-6 h-6" />
                   </div>
@@ -1216,20 +1213,20 @@ const GameApp: React.FC = () => {
                   onClick={() => { soundManager.playButtonClick(); setShowStats(true); setShowSettings(false); setIsSidebarOpen(false); }}
                   className="group relative flex items-center justify-end"
                 >
-                  <span className="absolute right-14 bg-black/80 text-white text-xs font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none backdrop-blur-sm border border-white/10">Stats</span>
+                  <span className="absolute right-14 md:right-auto md:left-1/2 md:-translate-x-1/2 md:top-14 bg-black/80 text-white text-xs font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none backdrop-blur-sm border border-white/10 z-[70]">Stats</span>
                   <div className="p-3 bg-black/40 hover:bg-black/60 text-white/70 hover:text-amber-400 rounded-xl shadow-lg border-b-4 border-white/5 hover:border-amber-500/30 transition-all active:scale-95 active:border-b-0 active:translate-y-1 backdrop-blur-md">
                     <TrophyIcon className="w-6 h-6" />
                   </div>
                 </button>
 
-                <div className="h-px w-8 bg-white/20 mx-auto my-1" />
+                <div className="h-px w-8 md:w-px md:h-8 bg-white/20 mx-auto md:mx-0 my-1 md:my-auto" />
 
                 {/* Settings */}
                 <button
                   onClick={() => { soundManager.playButtonClick(); setShowSettings(true); setShowStats(false); setIsSidebarOpen(false); }}
                   className="group relative flex items-center justify-end"
                 >
-                  <span className="absolute right-14 bg-black/80 text-white text-xs font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none backdrop-blur-sm border border-white/10">Settings</span>
+                  <span className="absolute right-14 md:right-auto md:left-1/2 md:-translate-x-1/2 md:top-14 bg-black/80 text-white text-xs font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none backdrop-blur-sm border border-white/10 z-[70]">Settings</span>
                   <div className="p-3 bg-black/40 hover:bg-black/60 text-white/70 hover:text-sky-400 rounded-xl shadow-lg border-b-4 border-white/5 hover:border-sky-500/30 transition-all active:scale-95 active:border-b-0 active:translate-y-1 backdrop-blur-md">
                     <Cog6ToothIcon className="w-6 h-6" />
                   </div>
@@ -1240,7 +1237,7 @@ const GameApp: React.FC = () => {
                   onClick={() => { soundManager.playButtonClick(); logout(); }}
                   className="group relative flex items-center justify-end"
                 >
-                  <span className="absolute right-14 bg-black/80 text-white text-xs font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none backdrop-blur-sm border border-white/10">Sign Out</span>
+                  <span className="absolute right-14 md:right-auto md:left-1/2 md:-translate-x-1/2 md:top-14 bg-black/80 text-white text-xs font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none backdrop-blur-sm border border-white/10 z-[70]">Sign Out</span>
                   <div className="p-3 bg-black/40 hover:bg-black/60 text-white/70 hover:text-red-400 rounded-xl shadow-lg border-b-4 border-white/5 hover:border-red-500/30 transition-all active:scale-95 active:border-b-0 active:translate-y-1 backdrop-blur-md">
                     <ArrowLeftOnRectangleIcon className="w-6 h-6" />
                   </div>
@@ -1259,7 +1256,7 @@ const GameApp: React.FC = () => {
 
               {
                 !showSettings && !showStats && !showOffline && (
-                  <div className="mb-6 flex gap-3">
+                  <div className="mb-6 flex flex-col sm:flex-row gap-3">
                     <button
                       onClick={() => { soundManager.playButtonClick(); setGameMode('RAID'); setView('RAID_SETUP'); }}
                       className="flex-1 py-3 bg-purple-500 hover:bg-purple-400 text-white border-b-4 border-purple-700 rounded-xl font-bold text-sm uppercase tracking-wider shadow-lg flex items-center justify-center gap-2 transform active:scale-95 transition-all"
@@ -1708,9 +1705,9 @@ const GameApp: React.FC = () => {
                         </div>
                       </div>
 
-                      {/* Compact Upload & OR */}
-                      <div className="flex items-center gap-3">
-                        <div className="font-black text-slate-300 text-xs tracking-widest uppercase whitespace-nowrap">- OR -</div>
+                      {/* Compact Upload & OR - Stack on mobile, row on tablet+ */}
+                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                        <div className="font-black text-slate-300 text-xs tracking-widest uppercase whitespace-nowrap text-center sm:text-left py-2 sm:py-0">- OR -</div>
 
                         <label className="flex-1 cursor-pointer group">
                           <input type="file" accept="image/*,application/pdf" onChange={handleFileChange} disabled={loading} className="hidden" />
