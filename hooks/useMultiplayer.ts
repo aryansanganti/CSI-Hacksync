@@ -3,7 +3,7 @@ import { io, Socket } from 'socket.io-client';
 import { PlayerProfile } from '../types';
 
 // Explicit connection to backend server
-const SERVER_URL = 'http://localhost:3001';
+const SERVER_URL = import.meta.env.VITE_SOCKET_SERVER_URL || '';
 
 export const useMultiplayer = () => {
     const [socket, setSocket] = useState<Socket | null>(null);
