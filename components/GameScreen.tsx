@@ -647,122 +647,93 @@ export const GameScreen: React.FC<GameScreenProps> = ({
         }}
       />
 
-      {/* Top Bar */}
-      <div className="absolute top-0 left-0 right-0 z-50 p-3 md:p-4">
-        <div className="max-w-5xl mx-auto flex justify-center items-center">
-          {/* Centered HUD Container */}
-          <div className="flex items-center gap-2 md:gap-3 flex-wrap justify-center">
-            {/* Topic Title */}
-            <div className="bg-black/60 backdrop-blur-md rounded-2xl px-3 py-2 md:px-4 md:py-2.5 shadow-lg border border-white/10 flex items-center gap-2 max-w-[140px] md:max-w-[200px]">
-              <BookOpenIcon className="w-5 h-5 text-purple-400" />
-              <span className="font-bold text-white/90 text-xs md:text-sm truncate">{gameState.topic_title || 'Study Session'}</span>
+      <div className="absolute top-0 left-0 right-0 z-50 p-3 md:p-4 flex justify-center">
+        {/* Unified HUD Bar */}
+        <div className="bg-black/80 backdrop-blur-xl rounded-2xl p-2 md:p-3 shadow-[0_0_20px_rgba(0,0,0,0.5)] border border-white/10 ring-1 ring-white/5 flex items-center gap-3 md:gap-6 max-w-fit mx-auto transition-all animate-slideDown">
+
+          {/* Group 1: Session Info */}
+          <div className="flex items-center gap-3 pr-3 md:pr-6 border-r border-white/10">
+            {/* Topic */}
+            <div className="hidden md:flex items-center gap-2 text-white/90">
+              <BookOpenIcon className="w-4 h-4 text-purple-400" />
+              <span className="font-bold text-xs max-w-[120px] truncate">{gameState.topic_title || 'Study Session'}</span>
             </div>
+            {/* Question Count */}
+            <div className="flex items-center gap-1.5">
+              <ClipboardDocumentListIcon className="w-4 h-4 text-sky-400" />
+              <span className="font-black text-white text-sm">
+                {gameState.stats.current_turn_index + 1}<span className="text-white/40 text-xs">/{gameState.stats.total_turns}</span>
+              </span>
+            </div>
+          </div>
+
+          {/* Group 2: Vitals (Streak & Mana) */}
+          <div className="flex items-center gap-3 md:gap-6 pr-3 md:pr-6 border-r border-white/10">
             {/* Streak */}
-            <div className="bg-black/60 backdrop-blur-md rounded-2xl px-3 py-2 md:px-4 md:py-2.5 shadow-lg border border-white/10 flex items-center gap-2">
-              <div className="flex items-center gap-1.5">
-                <FireIcon className="w-5 h-5 text-yellow-500" />
-                <span className="font-black text-white text-sm md:text-base">{gameState.stats.streak}</span>
-              </div>
-              <span className="text-white/50 text-[10px] md:text-xs font-bold uppercase hidden sm:block">Streak</span>
-            </div>
-            {/* Question Progress */}
-            <div className="bg-black/60 backdrop-blur-md rounded-2xl px-3 py-2 md:px-4 md:py-2.5 shadow-lg border border-white/10 flex items-center gap-2">
-              <div className="flex items-center gap-1.5">
-                <ClipboardDocumentListIcon className="w-5 h-5 text-sky-400" />
-                <span className="font-black text-white text-sm md:text-base">
-                  {gameState.stats.current_turn_index + 1}<span className="text-white/50 font-bold">/{gameState.stats.total_turns}</span>
-                </span>
-              </div>
-              <span className="text-white/50 text-[10px] md:text-xs font-bold uppercase hidden sm:block">Question</span>
+            <div className="flex items-center gap-1.5" title="Current Streak">
+              <FireIcon className="w-4 h-4 text-orange-500" />
+              <span className="font-black text-white text-sm">{gameState.stats.streak}</span>
             </div>
 
             {/* Mana Bar */}
-            <div className="bg-black/60 backdrop-blur-md rounded-2xl px-3 py-2 md:px-4 md:py-2.5 shadow-lg border border-white/10 flex items-center gap-2 min-w-[100px]">
-              <BoltIcon className="w-5 h-5 text-blue-400" />
-              <div className="flex-1 min-w-[60px]">
-                <div className="h-2 bg-blue-900/50 rounded-full overflow-hidden">
+            <div className="flex items-center gap-2 min-w-[80px] md:min-w-[120px]">
+              <BoltIcon className="w-4 h-4 text-blue-400" />
+              <div className="flex-1 flex flex-col gap-0.5">
+                <div className="h-1.5 bg-white/10 rounded-full overflow-hidden w-full">
                   <div
-                    className="h-full bg-gradient-to-r from-blue-500 to-cyan-400 transition-all duration-300"
+                    className="h-full bg-gradient-to-r from-blue-500 to-cyan-400 shadow-[0_0_10px_rgba(56,189,248,0.5)] transition-all duration-500"
                     style={{ width: `${(gameState.stats.mana / gameState.stats.max_mana) * 100}%` }}
                   />
                 </div>
-                <div className="flex justify-between text-[10px] font-bold text-white/70 mt-0.5">
-                  <span>{gameState.stats.mana}</span>
-                  <span>{gameState.stats.max_mana}</span>
-                </div>
               </div>
             </div>
+          </div>
 
-            {/* Shield Power-up Button */}
+          {/* Group 3: Actions */}
+          <div className="flex items-center gap-1.5">
+            {/* Powerup */}
             {onUsePowerup && (
               <button
                 onClick={() => onUsePowerup('SHIELD')}
                 disabled={gameState.stats.mana < 30 || gameState.stats.active_powerups.some(p => p.type === 'SHIELD')}
-                className="bg-purple-500/80 backdrop-blur-md rounded-2xl px-3 py-2 shadow-lg border border-purple-300/30 hover:bg-purple-400 transition-all disabled:opacity-30 disabled:cursor-not-allowed relative group"
-                title="Shield (30 mana) - Block next damage"
+                className="w-8 h-8 flex items-center justify-center rounded-lg bg-purple-500/20 hover:bg-purple-500/40 border border-purple-500/30 text-purple-300 transition-all disabled:opacity-30 relative"
+                title="Shield (30 mana)"
               >
-                <div className="flex items-center gap-1.5">
-                  <ShieldCheckIcon className="w-5 h-5 text-purple-200" />
-                  <span className="text-white font-bold text-xs hidden md:block">30</span>
-                </div>
+                <ShieldCheckIcon className="w-4 h-4" />
                 {gameState.stats.active_powerups.some(p => p.type === 'SHIELD') && (
-                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-black/60" />
+                  <div className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full shadow-[0_0_5px_rgba(34,197,94,0.8)]" />
                 )}
               </button>
             )}
-            {/* Oracle Mode Toggle */}
+
+            {/* Oracle */}
             <button
               onClick={() => {
                 soundManager.playButtonClick();
                 setOracleModeEnabled(!oracleModeEnabled);
                 if (oracleModeEnabled) window.speechSynthesis.cancel();
               }}
-              className={`bg-black/60 backdrop-blur-md rounded-2xl p-2.5 shadow-lg border transition-all group ${oracleModeEnabled ? 'border-purple-400 bg-purple-900/40' : 'border-white/10 hover:bg-white/10'}`}
-              title={oracleModeEnabled ? "Disable Oracle Mode" : "Enable Oracle Mode (Voice)"}
+              className={`w-8 h-8 flex items-center justify-center rounded-lg border transition-all ${oracleModeEnabled ? 'bg-purple-500 text-white border-purple-400 shadow-[0_0_10px_rgba(168,85,247,0.5)]' : 'bg-white/5 border-white/10 text-white/50 hover:bg-white/10 hover:text-white'}`}
             >
-              {oracleModeEnabled ? (
-                <SpeakerWaveIcon className="w-5 h-5 text-purple-400 animate-pulse" />
-              ) : (
-                <SpeakerWaveIcon className="w-5 h-5 text-white/50 group-hover:text-white" />
-              )}
+              <SpeakerWaveIcon className="w-4 h-4" />
             </button>
 
-            {/* Wisdom Scroll Button */}
+            {/* Hint */}
             <button
               onClick={handleWisdomScroll}
               disabled={isFetchingWisdom || showWisdomModal}
-              className={`
-                bg-amber-500/80 backdrop-blur-md rounded-2xl p-2.5 shadow-lg border border-amber-300/30 
-                hover:bg-amber-400 transition-all group relative overflow-hidden
-                ${isFetchingWisdom ? 'animate-pulse cursor-wait' : ''}
-              `}
-              title="Use Wisdom Scroll (Get a Hint)"
+              className={`w-8 h-8 flex items-center justify-center rounded-lg border border-amber-500/30 bg-amber-500/10 text-amber-500 hover:bg-amber-500/20 transition-all ${isFetchingWisdom ? 'animate-pulse' : ''}`}
             >
-              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
-              <LightBulbIcon className={`w-5 h-5 text-white ${isFetchingWisdom ? 'animate-bounce' : 'group-hover:scale-110 transition-transform'}`} />
+              <LightBulbIcon className="w-4 h-4" />
             </button>
 
-            {/* Give Up */}
+            {/* Exit */}
             <button
               onClick={() => { soundManager.playButtonClick(); onGiveUp(); }}
-              className="bg-black/60 backdrop-blur-md rounded-2xl p-2.5 shadow-lg border border-white/10 hover:bg-red-500/80 transition-all group"
+              className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 hover:bg-red-500/20 hover:text-red-400 border border-white/10 hover:border-red-500/30 text-white/50 transition-all"
             >
-              <XMarkIcon className="w-5 h-5 text-white/70 group-hover:text-white transition-colors" />
+              <XMarkIcon className="w-4 h-4" />
             </button>
-
-            {/* Save & Quit (if available) */}
-            {onSaveAndQuit && (
-              <button
-                onClick={() => { soundManager.playButtonClick(); onSaveAndQuit(); }}
-                className="bg-black/60 backdrop-blur-md rounded-2xl px-3 py-2 shadow-lg border border-white/10 hover:bg-blue-500/80 transition-all group hidden md:flex items-center gap-1.5"
-                title="Save & Quit"
-              >
-                <span className="text-[10px] font-bold text-white/70 group-hover:text-white transition-colors uppercase">Save</span>
-              </button>
-            )}
-
-
-
           </div>
         </div>
       </div>
@@ -771,32 +742,30 @@ export const GameScreen: React.FC<GameScreenProps> = ({
       <div
         className="absolute left-0 right-0 z-30 px-2 md:px-4 flex items-center justify-center"
         style={{
-          top: typewriterComplete ? '52px' : '50%',
+          top: typewriterComplete ? '100px' : '50%', // Increased top offset to 100px
           transform: typewriterComplete ? 'translateY(0)' : 'translateY(-50%)',
           transition: 'all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)'
         }}
       >
         <div className="max-w-2xl md:max-w-3xl w-full">
           <div
-            className="bg-black/50 backdrop-blur-md rounded-xl md:rounded-2xl px-3 py-2 md:px-8 md:py-5 shadow-2xl border border-white/10"
+            className="bg-black/40 backdrop-blur-md rounded-xl md:rounded-2xl px-4 py-3 md:px-8 md:py-6 shadow-2xl border border-white/10"
             style={{
               opacity: (showNarrative && !selectedOption && !waitingForTurn) ? 1 : 0,
               transform: (showNarrative && !selectedOption && !waitingForTurn) ? 'scale(1)' : 'scale(0.95)',
               transition: 'opacity 0.6s ease-out, transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)'
             }}
           >
-            <p className={`text-white font-bold leading-snug md:leading-relaxed text-center transition-all duration-500 ${typewriterComplete ? 'text-xs md:text-xl' : 'text-sm md:text-2xl'} flex items-center justify-center`}>
-              <SparklesIcon className="w-5 h-5 text-yellow-400/80 mr-1 md:mr-2 inline" />
-              <span className="italic">"{typewriterText}"</span>
-              {!typewriterComplete && <span className="animate-pulse text-yellow-400">|</span>}
-              <SparklesIcon className="w-5 h-5 text-yellow-400/80 ml-1 md:ml-2 inline" />
+            <p className={`text-white font-medium leading-snug md:leading-relaxed text-center transition-all duration-500 ${typewriterComplete ? 'text-sm md:text-lg' : 'text-base md:text-xl'} flex items-center justify-center font-mono`}>
+              <span className="italic text-sky-200">"{typewriterText}"</span>
+              {!typewriterComplete && <span className="animate-pulse text-sky-400 w-2 inline-block">_</span>}
             </p>
           </div>
         </div>
       </div>
 
       {/* Question Card - Upper area, below story */}
-      <div className="absolute top-[115px] md:top-[220px] lg:top-[240px] left-0 right-0 z-40 pointer-events-none flex justify-center">
+      <div className="absolute top-[180px] md:top-[260px] lg:top-[280px] left-0 right-0 z-40 pointer-events-none flex justify-center">
         <div className={`max-w-md md:max-w-xl lg:max-w-2xl w-full mx-auto px-4 md:px-6 ${(showQuestion && !showExplanation && !waitingForTurn) ? 'pointer-events-auto' : 'pointer-events-none'}`}>
           <div
             className="bg-white/80 backdrop-blur-md rounded-2xl md:rounded-[1.5rem] border-b-2 md:border-b-4 border-slate-200/50 shadow-2xl overflow-hidden"
