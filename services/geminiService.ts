@@ -122,12 +122,48 @@ export const initializeGame = async (params: InitGameParams): Promise<FullGameMa
   // 1. Remove markdown code blocks
   let cleanJson = text.replace(/```json/g, '').replace(/```/g, '').trim();
 
-  // 2. Find the absolute first '{' and last '}' to handle any conversational prefix/suffix
+  // 2. Robustly find the matching closing brace to ignore trailing text
   const startIdx = cleanJson.indexOf('{');
-  const endIdx = cleanJson.lastIndexOf('}');
+  if (startIdx !== -1) {
+    let openBraces = 0;
+    let endIdx = -1;
+    let inString = false;
+    let isEscaped = false;
 
-  if (startIdx !== -1 && endIdx !== -1 && endIdx > startIdx) {
-    cleanJson = cleanJson.substring(startIdx, endIdx + 1);
+    for (let i = startIdx; i < cleanJson.length; i++) {
+      const char = cleanJson[i];
+
+      if (isEscaped) {
+        isEscaped = false;
+        continue;
+      }
+
+      if (char === '\\') {
+        isEscaped = true;
+        continue;
+      }
+
+      if (char === '"') {
+        inString = !inString;
+        continue;
+      }
+
+      if (!inString) {
+        if (char === '{') {
+          openBraces++;
+        } else if (char === '}') {
+          openBraces--;
+          if (openBraces === 0) {
+            endIdx = i;
+            break;
+          }
+        }
+      }
+    }
+
+    if (endIdx !== -1) {
+      cleanJson = cleanJson.substring(startIdx, endIdx + 1);
+    }
   }
 
   console.log("[initializeGame] Cleaned JSON:", cleanJson.substring(0, 500));
