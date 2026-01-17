@@ -61,6 +61,7 @@ const GameApp: React.FC = () => {
   const [playerStats, setPlayerStats] = useState<PlayerStats>(() => loadStats());
   const gameStartTime = useRef<number>(0);
   const currentTopicName = useRef<string>('');
+  const currentSessionMissedQuestions = useRef<MissedQuestion[]>([]);
 
   // Image Assets (Game Mode)
   const [bossImage, setBossImage] = useState<string | null>(null);
@@ -314,6 +315,7 @@ const GameApp: React.FC = () => {
       const topicName = file?.name || topic || pastedContent?.substring(0, 50) || 'Unknown Topic';
       currentTopicName.current = topicName;
       gameStartTime.current = Date.now();
+      currentSessionMissedQuestions.current = []; // Reset missed questions for new game
       const newStats = recordGameStart(topicName);
       setPlayerStats(newStats);
 
@@ -395,6 +397,16 @@ const GameApp: React.FC = () => {
       answer
     );
     setPlayerStats(turnStats);
+
+    // Track missed question in current session
+    if (!isCorrect) {
+      currentSessionMissedQuestions.current.push({
+        question: gameState.current_turn.question,
+        correctAnswer: gameState.current_turn.correct_answer || '',
+        playerAnswer: answer,
+        timestamp: Date.now()
+      });
+    }
 
     if (newStatus === GameStatus.WON || newStatus === GameStatus.LOST) {
       const timePlayedMs = Date.now() - gameStartTime.current;
@@ -516,6 +528,7 @@ const GameApp: React.FC = () => {
     preloadedTurns.current = [];
     pendingNextTurnIndex.current = -1;
     setLoadingProgress(null);
+    currentSessionMissedQuestions.current = []; // Reset missed questions when returning to menu
   };
 
   // Resume saved game
@@ -1120,6 +1133,9 @@ const GameApp: React.FC = () => {
           onSaveAndQuit={handleSaveAndQuit}
           onUsePowerup={handleUsePowerup}
           soundManager={soundManager}
+          missedQuestions={[...currentSessionMissedQuestions.current]}
+          topicName={gameState.topic_title || 'General Knowledge'}
+          contextSummary={gameState.context_summary}
         />
       ) : null
       }
