@@ -186,9 +186,9 @@ export const initializeGame = async (params: InitGameParams): Promise<FullGameMa
   const defaultTheme = {
     setting: "A wacky cartoon world",
     boss_name: "The Challenge Boss",
-    boss_visual_prompt: "Cute cartoon monster, 3d render, solid green background, NO green on character",
-    player_visual_prompt: `${playerDesc} hero, 3d render, solid green background, NO green on character`,
-    background_visual_prompt: "Cartoon landscape background"
+    boss_visual_prompt: "Epic 3D render of a menacing Raid Boss monster, high detail, 4k, dramatic lighting, imposing stance, solid bright green background, NO green on character, MUST face LEFT",
+    player_visual_prompt: `${playerDesc} hero, 3d render, solid green background, NO green on character, facing RIGHT`,
+    background_visual_prompt: "Epic fantasy landscape background, high detail, 4k"
   };
   // Ensure theme object exists and has all keys filled
   state.theme = { ...defaultTheme, ...(state.theme || {}) };
