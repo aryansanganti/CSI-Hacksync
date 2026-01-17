@@ -874,21 +874,20 @@ const GameApp: React.FC = () => {
           />
         )
       ) : view === 'MENU' ? (
-        <div className="flex items-center justify-center min-h-screen p-4">
-          <div className="w-full max-w-lg">
+        <div className="relative flex items-center justify-center min-h-screen p-4 overflow-hidden">
+          {/* Background Image */}
+          <div className="absolute inset-0 z-0">
+            <img
+              src="/background.png"
+              alt="Background"
+              className="w-full h-full object-cover opacity-100"
+            />
 
-            {/* Logo Area */}
-            <div className="text-center mb-6 md:mb-10">
-              <div className="inline-block p-4 rounded-3xl bg-sky-400 text-white mb-4 rotate-3 shadow-lg transition-transform hover:rotate-6">
-                <Swords className="w-10 h-10 md:w-12 md:h-12" strokeWidth={2.5} />
-              </div>
-              <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-slate-800 mb-2">
-                Clash of Minds
-              </h1>
-              <p className="text-slate-500 font-bold text-lg">
-                Turn boring notes into a game
-              </p>
-            </div>
+          </div>
+
+          <div className="relative z-10 w-full max-w-lg">
+
+
 
             {/* Menu Buttons Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
@@ -973,18 +972,25 @@ const GameApp: React.FC = () => {
 
               {!showSettings && !showStats && (
                 <>
-                  <div className="mb-6 flex gap-3">
+                  <div className="mb-6 bg-slate-100 p-1.5 rounded-2xl flex gap-1">
+                    {/* Mode Tabs */}
                     <button
-                      onClick={() => { soundManager.playButtonClick(); handleOpenLobby(); }}
-                      className="flex-1 py-3 bg-purple-500 hover:bg-purple-400 text-white border-b-4 border-purple-700 rounded-xl font-bold text-sm uppercase tracking-wider shadow-lg flex items-center justify-center gap-2 transform active:scale-95 transition-all"
+                      onClick={() => { soundManager.playButtonClick(); setGameMode('SOLO'); }}
+                      className={`flex-1 py-3 rounded-xl font-black text-xs md:text-sm uppercase tracking-wide transition-all flex items-center justify-center gap-2 ${gameMode === 'SOLO' ? 'bg-green-500 text-white shadow-md transform scale-105' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200'}`}
                     >
-                      <UserGroupIcon className="w-5 h-5" /> Raid
+                      <UserIcon className="w-4 h-4" /> Solo
                     </button>
                     <button
-                      onClick={() => { soundManager.playButtonClick(); setView('COMPETITION_SETUP'); }}
-                      className="flex-1 py-3 bg-red-500 hover:bg-red-400 text-white border-b-4 border-red-700 rounded-xl font-bold text-sm uppercase tracking-wider shadow-lg flex items-center justify-center gap-2 transform active:scale-95 transition-all"
+                      onClick={() => { soundManager.playButtonClick(); setGameMode('RAID'); }}
+                      className={`flex-1 py-3 rounded-xl font-black text-xs md:text-sm uppercase tracking-wide transition-all flex items-center justify-center gap-2 ${gameMode === 'RAID' ? 'bg-purple-500 text-white shadow-md transform scale-105' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200'}`}
                     >
-                      <Swords className="w-5 h-5" /> 1v1 Battle
+                      <UserGroupIcon className="w-4 h-4" /> Raid
+                    </button>
+                    <button
+                      onClick={() => { soundManager.playButtonClick(); setGameMode('PVP'); }}
+                      className={`flex-1 py-3 rounded-xl font-black text-xs md:text-sm uppercase tracking-wide transition-all flex items-center justify-center gap-2 ${gameMode === 'PVP' ? 'bg-red-500 text-white shadow-md transform scale-105' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200'}`}
+                    >
+                      <Swords className="w-4 h-4" /> PvP
                     </button>
                   </div>
                   {/* Resume Game Modal */}
@@ -1262,87 +1268,88 @@ const GameApp: React.FC = () => {
                       </div>
                     </div>
 
-                    <div className="space-y-3 pt-2">
-                      <button
-                        type="submit"
-                        disabled={loading || (!topic && !file && !pastedContent)}
-                        className="relative w-full bg-green-500 hover:bg-green-400 active:bg-green-600 text-white border-b-8 border-green-700 active:border-b-0 active:translate-y-2 rounded-2xl py-4 font-black text-xl uppercase tracking-widest transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center shadow-lg overflow-hidden"
-                      >
-                        {loading && (
-                          <div className="absolute left-6 top-1/2 -translate-y-1/2">
-                            <SparklesIcon className="w-6 h-6 animate-spin text-white" />
-                          </div>
-                        )}
-
-                        <div className="flex flex-col items-center leading-tight">
-                          <span className={loading ? "animate-pulse" : ""}>{loading ? "LOADING..." : "START BATTLE"}</span>
-                          {loading && (
-                            <span className="text-[10px] opacity-90 font-bold mt-0.5 tracking-normal normal-case">
-                              this can take a minute, please wait
-                            </span>
-                          )}
+                    <button
+                      type="submit"
+                      disabled={loading || (!topic && !file && !pastedContent)}
+                      className={`relative w-full text-white border-b-8 rounded-2xl py-4 font-black text-xl uppercase tracking-widest transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center shadow-lg overflow-hidden active:border-b-0 active:translate-y-2
+                          ${gameMode === 'SOLO' ? 'bg-green-500 hover:bg-green-400 active:bg-green-600 border-green-700' :
+                          gameMode === 'RAID' ? 'bg-purple-500 hover:bg-purple-400 active:bg-purple-600 border-purple-700' :
+                            'bg-red-500 hover:bg-red-400 active:bg-red-600 border-red-700'
+                        }`}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        if (gameMode === 'SOLO') handleStartGame();
+                        else if (gameMode === 'RAID') handleOpenLobby();
+                        else setView('COMPETITION_SETUP');
+                      }}
+                    >
+                      {loading && (
+                        <div className="absolute left-6 top-1/2 -translate-y-1/2">
+                          <SparklesIcon className="w-6 h-6 animate-spin text-white" />
                         </div>
-                      </button>
+                      )}
 
-                      <button
-                        type="button"
-                        onClick={handleOpenLobby}
-                        disabled={loading || (!topic && !file && !pastedContent)}
-                        className="w-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-purple-600 border-b-4 border-slate-300 hover:border-purple-300 active:border-b-0 active:translate-y-2 rounded-2xl py-3 font-bold text-sm uppercase tracking-widest transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                      >
-                        <UserGroupIcon className="w-5 h-5" />
-                        <span>Start Co-op Raid</span>
-                      </button>
-                    </div>
+                      <div className="flex flex-col items-center leading-tight">
+                        <span className={loading ? "animate-pulse" : ""}>
+                          {loading ? "LOADING..." : gameMode === 'SOLO' ? "START ADVENTURE" : gameMode === 'RAID' ? "START RAID" : "SETUP DUEL"}
+                        </span>
+                        {loading && (
+                          <span className="text-[10px] opacity-90 font-bold mt-0.5 tracking-normal normal-case">
+                            this can take a minute, please wait
+                          </span>
+                        )}
+                      </div>
+                    </button>
+                  </div>
 
 
 
-                    {/* Manual Resume Button (Debug/Fallback) */}
-                    {!loading && currentUser && hasSavedGame(currentUser.uid) && (
-                      <button
-                        onClick={() => {
-                          const saved = loadGameState(currentUser.uid);
-                          if (saved) {
-                            setSavedGameData(saved);
-                            setShowResumeModal(true);
-                          }
-                        }}
-                        className="mt-2 w-full bg-blue-500 hover:bg-blue-400 text-white border-b-4 border-blue-700 active:border-b-0 active:translate-y-1 rounded-xl py-2 font-bold text-sm uppercase tracking-wide transition-all"
-                      >
-                        📂 Resume Saved Game
-                      </button>
-                    )}
-
-                  </>
+                {/* Manual Resume Button (Debug/Fallback) */}
+                {!loading && currentUser && hasSavedGame(currentUser.uid) && (
+                  <button
+                    onClick={() => {
+                      const saved = loadGameState(currentUser.uid);
+                      if (saved) {
+                        setSavedGameData(saved);
+                        setShowResumeModal(true);
+                      }
+                    }}
+                    className="mt-2 w-full bg-blue-500 hover:bg-blue-400 text-white border-b-4 border-blue-700 active:border-b-0 active:translate-y-1 rounded-xl py-2 font-bold text-sm uppercase tracking-wide transition-all"
+                  >
+                    📂 Resume Saved Game
+                  </button>
                 )}
 
-              </form>
-            </div>
+              </>
+                )}
 
-            <p className="text-center text-xs font-bold text-slate-300 mt-8 uppercase tracking-widest">
-              Powered by Google Gemini
-            </p>
-
+            </form>
           </div>
+
+          <p className="text-center text-xs font-bold text-slate-300 mt-8 uppercase tracking-widest">
+            Powered by Google Gemini
+          </p>
+
         </div>
-      ) : gameState ? (
-        <GameScreen
-          gameState={gameState}
-          bossImage={bossImage}
-          playerImage={playerImage}
-          backgroundImage={backgroundImage}
-          onAction={handleAction}
-          onTransitionComplete={handleTransitionComplete}
-          onGiveUp={handleReset}
-          onSaveAndQuit={handleSaveAndQuit}
-          onUsePowerup={handleUsePowerup}
-          soundManager={soundManager}
-          missedQuestions={[...currentSessionMissedQuestions.current]}
-          topicName={gameState.topic_title || 'General Knowledge'}
-          contextSummary={gameState.context_summary}
-        />
-      ) : null
-      }
+        </div>
+  ) : gameState ? (
+    <GameScreen
+      gameState={gameState}
+      bossImage={bossImage}
+      playerImage={playerImage}
+      backgroundImage={backgroundImage}
+      onAction={handleAction}
+      onTransitionComplete={handleTransitionComplete}
+      onGiveUp={handleReset}
+      onSaveAndQuit={handleSaveAndQuit}
+      onUsePowerup={handleUsePowerup}
+      soundManager={soundManager}
+      missedQuestions={[...currentSessionMissedQuestions.current]}
+      topicName={gameState.topic_title || 'General Knowledge'}
+      contextSummary={gameState.context_summary}
+    />
+  ) : null
+}
     </div >
   );
 };
