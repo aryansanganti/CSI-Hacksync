@@ -10,6 +10,7 @@ interface CompetitionSetupProps {
     onBack: () => void;
     multiplayer: any;
     isRaid?: boolean;
+    isLoading?: boolean;
 }
 
 const AVATAR_PROMPTS: Record<string, string> = {
@@ -25,7 +26,7 @@ const AVATAR_PROMPTS: Record<string, string> = {
     '🤠': 'Cute 3d cartoon cowboy, wearing a hat and sheriff badge, holding a lasso'
 };
 
-export const CompetitionSetup: React.FC<CompetitionSetupProps> = ({ onGameStart, onBack, multiplayer, isRaid = false }) => {
+export const CompetitionSetup: React.FC<CompetitionSetupProps> = ({ onGameStart, onBack, multiplayer, isRaid = false, isLoading = false }) => {
     const [step, setStep] = useState<1 | 2>(1); // 1: Profile, 2: Lobby
     const [mode, setMode] = useState<'HOST' | 'JOIN'>('HOST');
 
@@ -191,7 +192,20 @@ export const CompetitionSetup: React.FC<CompetitionSetupProps> = ({ onGameStart,
     const handleStartGameHost = () => {
         if (!multiplayer.socket) return;
         soundManager.playButtonClick();
-        setIsStarting(true); // Start loading
+
+        // We don't set a local timeout-based loader anymore.
+        // The App-level isLoading prop will handle the UI state once generation starts.
+        // However, there is a small gap between emitting 'start_game_request' and receiving 'game_start'.
+        // We can keep a short local 'isRequesting' if valid, but for now let's rely on the flow.
+
+        // Actually, to give immediate feedback before the socket event returns 'game_start',
+        // we can set a local flag that clears only on error or timeout, 
+        // OR just trust the user sees the spinner if we optimistically disable.
+        // But the previous issue was the timeout clearing TOO EARLY.
+        // So we will just fire the event. The "Start" button in UI will be disabled if `isLoading` is true.
+        // But `isLoading` only becomes true when `onGameStart` is called (which happens AFTER socket event returns).
+        // So we DO need a local "Waiting for response..." state that bridges the gap.
+        setIsStarting(true);
 
         const hostProfile = {
             id: multiplayer.socket?.id,
@@ -212,8 +226,10 @@ export const CompetitionSetup: React.FC<CompetitionSetupProps> = ({ onGameStart,
 
         multiplayer.socket.emit('start_game_request', { roomId, gameConfig: config });
 
-        // Safety timeout in case server doesn't respond
-        setTimeout(() => setIsStarting(false), 8000);
+        // We REMOVE the timeout that auto-resets this. 
+        // It will only reset if we navigate away or get an error (which we can't easily catch from here without a listener).
+        // A safety timeout of 30s is better than 8s.
+        setTimeout(() => setIsStarting(false), 30000);
     };
 
     return (
@@ -375,18 +391,18 @@ export const CompetitionSetup: React.FC<CompetitionSetupProps> = ({ onGameStart,
 
                         <button
                             onClick={handleStartGameHost}
-                            disabled={!topic || !opponent || isStarting}
+                            disabled={!topic || !opponent || isStarting || isLoading}
                             className="w-full py-4 bg-green-500 hover:bg-green-400 text-white border-b-4 border-green-700 rounded-2xl font-black text-lg uppercase tracking-wide shadow-lg transition-all active:border-b-0 active:translate-y-1 disabled:opacity-50 disabled:grayscale flex items-center justify-center gap-2"
                         >
-                            {isStarting ? (
+                            {isStarting || isLoading ? (
                                 <>
                                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                                    Starting Battle...
+                                    {isLoading ? 'Preparing Arena...' : 'Starting Battle...'}
                                 </>
                             ) : (
                                 'Start Battle'
                             )}
-                            Start {isRaid ? 'Raid' : 'Battle'}
+                            {!isStarting && !isLoading && <span>Start {isRaid ? 'Raid' : 'Battle'}</span>}
                         </button>
                     </div>
                 )}

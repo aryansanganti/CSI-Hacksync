@@ -73,8 +73,9 @@ export interface InitGameParams {
   gender: Gender;
   age: string;
   ethnicity: string;
-  mode?: 'SOLO' | 'COOP';
+  mode?: 'SOLO' | 'COOP' | 'RAID';
   players?: string[]; // Names of friends for Co-op
+  knowledgeShards?: MissedQuestion[];
 }
 
 export interface DebugTurn {

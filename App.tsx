@@ -430,7 +430,7 @@ const GameApp: React.FC = () => {
   };
 
   // --- 1. GENERATION LOGIC ---
-  const handleStartGame = async (mode: 'SOLO' | 'COOP' = 'SOLO', friends: string[] = []) => {
+  const handleStartGame = async (mode: 'SOLO' | 'COOP' | 'RAID' = 'SOLO', friends: string[] = []) => {
     if (!topic && !file && !pastedContent) return;
 
     soundManager.playButtonClick();
@@ -1077,6 +1077,7 @@ const GameApp: React.FC = () => {
           onGameStart={handleCompetitionStart}
           onBack={() => setView('MENU')}
           multiplayer={multiplayer}
+          isLoading={loading}
         />
       ) : view === 'RAID_SETUP' ? (
         <CompetitionSetup
@@ -1084,6 +1085,7 @@ const GameApp: React.FC = () => {
           onBack={() => setView('MENU')}
           multiplayer={multiplayer}
           isRaid={true}
+          isLoading={loading}
         />
       ) : view === 'COMPETITION_GAME' && competitionRoom && gameState ? (
         <CompetitionGameScreen
@@ -1714,10 +1716,7 @@ const GameApp: React.FC = () => {
                       </button>
                     </div>
 
-                    {/* Loading Progress Bar */}
-                    {loading && loadingProgress && (
-                      <LoadingProgress progress={loadingProgress} />
-                    )}
+                    {/* Main Input Form */}
 
                     {/* Manual Resume Button (Debug/Fallback) */}
                     {!loading && currentUser && hasSavedGame(currentUser.uid) && (
@@ -1765,6 +1764,19 @@ const GameApp: React.FC = () => {
         />
       ) : null
       }
+
+      {/* Global Loading Overlay */}
+      {loading && loadingProgress && (
+        <div className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-[2rem] p-8 max-w-md w-full shadow-2xl animate-scaleUp">
+            <div className="mb-4 text-center">
+              <SparklesIcon className="w-12 h-12 text-indigo-500 mx-auto animate-spin" />
+              <h2 className="text-xl font-black text-slate-800 mt-4 uppercase tracking-widest">Generating Game</h2>
+            </div>
+            <LoadingProgress progress={loadingProgress} />
+          </div>
+        </div>
+      )}
     </div >
   );
 };
