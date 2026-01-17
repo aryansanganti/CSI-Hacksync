@@ -2,17 +2,17 @@ import { useRef, useCallback, useEffect, useState } from 'react';
 
 // Sound file paths
 const SOUND_PATHS = {
-    buttonClick: '/sounds/button_click.wav',
-    playerAttack: '/sounds/player_attack.wav',
-    enemyDamage: '/sounds/enemy_damage.wav',
-    enemyAttack: '/sounds/enemy_attack.wav',
-    playerDamage: '/sounds/player_damage.wav',
-    correctAnswer: '/sounds/correct_answer.wav',
-    wrongAnswer: '/sounds/wrong_answer.wav',
-    victory: '/sounds/victory.wav',
-    defeat: '/sounds/defeat.wav',
-    appearChar: '/sounds/appear_char.wav',
-    appearUI: '/sounds/appear_ui.wav',
+    buttonClick: '',
+    playerAttack: '',
+    enemyDamage: '',
+    enemyAttack: '',
+    playerDamage: '',
+    correctAnswer: '',
+    wrongAnswer: '',
+    victory: '',
+    defeat: '',
+    appearChar: '',
+    appearUI: '',
 } as const;
 
 type SoundType = keyof typeof SOUND_PATHS;
@@ -55,6 +55,7 @@ export const useSoundManager = () => {
     // Preload audio files
     useEffect(() => {
         Object.entries(SOUND_PATHS).forEach(([key, path]) => {
+            if (!path) return;
             const audio = new Audio(path);
             audio.preload = 'auto';
             audio.onerror = () => { audio.dataset.broken = 'true'; };
