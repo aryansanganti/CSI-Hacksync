@@ -12,12 +12,13 @@ import { LobbyScreen } from './components/LobbyScreen';
 import { CompetitionSetup } from './components/CompetitionSetup';
 import { CompetitionGameScreen } from './components/CompetitionGameScreen';
 import { GrimoireModal } from './components/GrimoireModal';
+import { QuestsModal } from './components/QuestsModal';
 import { saveBattleForOffline, getOfflineBattles, deleteOfflineBattle } from './services/offlineService';
 import { OfflineBattlePack } from './types';
 import { SparklesIcon, PhotoIcon, Cog6ToothIcon, DocumentTextIcon, XMarkIcon, ClipboardDocumentListIcon, TrophyIcon, Bars3Icon, SpeakerWaveIcon, SpeakerXMarkIcon, UserGroupIcon, ArrowLeftOnRectangleIcon, FireIcon, CheckCircleIcon, BookOpenIcon, WifiIcon, TrashIcon, CloudArrowDownIcon } from '@heroicons/react/24/solid';
 import { RaidGameScreen } from './components/RaidGameScreen';
 
-import { Swords } from 'lucide-react';
+import { Swords, ChevronDown, CheckCircle, XCircle, Zap, Star, Sparkles, Trophy, Brain, Laptop } from 'lucide-react';
 import { useSoundManager } from './hooks/useSoundManager';
 import { useMultiplayer } from './hooks/useMultiplayer';
 import { KnowledgeProvider, useKnowledge } from './src/context/KnowledgeContext'; // Import Knowledge Context
@@ -56,73 +57,73 @@ const DailyQuestionWidget: React.FC<DailyQuestionWidgetProps> = ({ quest, soundM
       question: "In Python, what keyword is used to create a function?",
       options: ["def", "function", "func", "create"],
       correctAnswer: "def",
-      category: "🐍 Python"
+      category: " Python"
     },
     {
       question: "What does HTML stand for?",
       options: ["HyperText Markup Language", "High Tech Modern Language", "Home Tool Markup Language", "Hyperlink Text Making Language"],
       correctAnswer: "HyperText Markup Language",
-      category: "🌐 Web Dev"
+      category: " Web Dev"
     },
     {
       question: "Which CSS property is used to change text color?",
       options: ["color", "text-color", "font-color", "foreground"],
       correctAnswer: "color",
-      category: "🎨 CSS"
+      category: "CSS"
     },
     {
       question: "What is the output of: print(type([]))?",
       options: ["<class 'list'>", "<class 'array'>", "<class 'tuple'>", "<class 'dict'>"],
       correctAnswer: "<class 'list'>",
-      category: "🐍 Python"
+      category: "Python"
     },
     {
       question: "Which company developed React.js?",
       options: ["Facebook (Meta)", "Google", "Microsoft", "Amazon"],
       correctAnswer: "Facebook (Meta)",
-      category: "⚛️ React"
+      category: "React"
     },
     {
       question: "What does API stand for?",
       options: ["Application Programming Interface", "Advanced Program Integration", "Automatic Protocol Interface", "App Process Input"],
       correctAnswer: "Application Programming Interface",
-      category: "💻 Tech"
+      category: "Tech"
     },
     {
       question: "In JavaScript, which method adds an item to the end of an array?",
       options: ["push()", "append()", "add()", "insert()"],
       correctAnswer: "push()",
-      category: "📜 JavaScript"
+      category: "JavaScript"
     },
     {
       question: "What is the shortcut for 'Undo' on most computers?",
       options: ["Ctrl+Z / Cmd+Z", "Ctrl+U / Cmd+U", "Ctrl+Y / Cmd+Y", "Ctrl+X / Cmd+X"],
       correctAnswer: "Ctrl+Z / Cmd+Z",
-      category: "⌨️ Shortcuts"
+      category: "Shortcuts"
     },
     {
       question: "Which Python library is most popular for data analysis?",
       options: ["Pandas", "Django", "Flask", "Tkinter"],
       correctAnswer: "Pandas",
-      category: "📊 Data Science"
+      category: "Data Science"
     },
     {
       question: "What does 'AI' stand for in tech?",
       options: ["Artificial Intelligence", "Automated Integration", "Advanced Interface", "Application Index"],
       correctAnswer: "Artificial Intelligence",
-      category: "🤖 AI"
+      category: "AI"
     },
     {
       question: "Which tag is used for the largest heading in HTML?",
       options: ["<h1>", "<heading>", "<head>", "<h6>"],
       correctAnswer: "<h1>",
-      category: "🌐 HTML"
+      category: "HTML"
     },
     {
       question: "What is Git primarily used for?",
       options: ["Version Control", "Database Management", "Web Hosting", "Code Compilation"],
       correctAnswer: "Version Control",
-      category: "📦 Git"
+      category: "Git"
     }
   ];
 
@@ -152,78 +153,92 @@ const DailyQuestionWidget: React.FC<DailyQuestionWidgetProps> = ({ quest, soundM
 
   if (showResult) {
     return (
-      <div className={`mb-6 rounded-2xl p-6 border-4 shadow-2xl animate-fadeIn overflow-hidden relative ${isCorrect
-        ? 'bg-gradient-to-br from-green-400 to-emerald-500 border-green-300'
-        : 'bg-gradient-to-br from-red-400 to-rose-500 border-red-300'
+      <div className={`mb-6 rounded-2xl p-6 border shadow-lg animate-fadeIn overflow-hidden relative backdrop-blur-md ${isCorrect
+        ? 'bg-gradient-to-br from-emerald-500/20 to-green-600/20 border-emerald-500/30'
+        : 'bg-gradient-to-br from-red-500/20 to-rose-600/20 border-red-500/30'
         }`}>
         {/* Graffiti-style result */}
         <div className="text-center relative z-10">
           {isCorrect ? (
-            <>
-              <div className="text-6xl mb-2 animate-bounce">🎉</div>
-              <h2 className="text-4xl font-black text-white uppercase tracking-tight"
-                style={{ textShadow: '3px 3px 0 rgba(0,0,0,0.3), -1px -1px 0 rgba(255,255,255,0.5)' }}>
+            <div className="flex flex-col items-center">
+              <div className="p-3 bg-gradient-to-br from-emerald-400 to-green-600 rounded-full shadow-lg shadow-emerald-500/30 mb-2">
+                <Trophy className="w-8 h-8 text-white" />
+              </div>
+              <h2 className="text-2xl font-black text-white uppercase tracking-tight drop-shadow-md">
                 WELL DONE!
               </h2>
-              <p className="text-white/90 font-bold mt-2">You nailed it! 🔥</p>
-            </>
+              <div className="flex items-center gap-1 mt-1 text-emerald-300 font-bold">
+                <Sparkles className="w-4 h-4" />
+                <span>You nailed it!</span>
+              </div>
+            </div>
           ) : (
-            <>
-              <div className="text-5xl mb-2">😅</div>
-              <h2 className="text-3xl font-black text-white uppercase tracking-tight"
-                style={{ textShadow: '2px 2px 0 rgba(0,0,0,0.3)' }}>
+            <div className="flex flex-col items-center">
+              <div className="p-3 bg-gradient-to-br from-red-400 to-rose-600 rounded-full shadow-lg shadow-red-500/30 mb-2">
+                <XCircle className="w-8 h-8 text-white" />
+              </div>
+              <h2 className="text-2xl font-black text-white uppercase tracking-tight drop-shadow-md">
                 Nice Try!
               </h2>
-              <div className="mt-3 bg-white/20 backdrop-blur rounded-xl p-3">
-                <p className="text-white/80 text-sm font-bold">Correct Answer:</p>
-                <p className="text-white text-xl font-black">{dailyQuestion.correctAnswer}</p>
+              <div className="mt-3 bg-white/10 backdrop-blur rounded-xl p-3 border border-red-500/30 w-full">
+                <p className="text-red-200/80 text-xs font-bold uppercase tracking-wide mb-1">Correct Answer</p>
+                <p className="text-white text-lg font-black">{dailyQuestion.correctAnswer}</p>
               </div>
-            </>
+            </div>
           )}
           <button
             onClick={resetWidget}
-            className="mt-4 px-6 py-2 bg-white/30 hover:bg-white/50 rounded-full text-white font-bold text-sm uppercase transition-all"
+            className={`mt-4 px-6 py-2 rounded-xl text-white font-bold text-sm uppercase transition-all shadow-lg border-b-4 active:border-b-0 active:translate-y-1 ${isCorrect
+              ? 'bg-emerald-500 hover:bg-emerald-400 border-emerald-700'
+              : 'bg-rose-500 hover:bg-rose-400 border-rose-700'
+              }`}
           >
             Got it!
           </button>
         </div>
 
         {/* Background decorations */}
-        <div className="absolute top-2 right-2 text-6xl opacity-20 rotate-12">⭐</div>
-        <div className="absolute bottom-2 left-2 text-4xl opacity-20 -rotate-12">✨</div>
+        <div className={`absolute top-2 right-2 text-white/5 rotate-12`}>
+          {isCorrect ? <Star className="w-12 h-12" /> : <XCircle className="w-12 h-12" />}
+        </div>
+        <div className={`absolute bottom-2 left-2 text-white/5 -rotate-12`}>
+          <Sparkles className="w-8 h-8" />
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="mb-6 bg-gradient-to-br from-indigo-50 to-purple-50 rounded-2xl border-2 border-indigo-200 shadow-lg animate-fadeIn overflow-hidden">
+    <div className="mb-6 bg-black/40 backdrop-blur-md rounded-2xl border border-white/10 shadow-[0_0_20px_rgba(0,0,0,0.3)] ring-1 ring-white/10 animate-fadeIn overflow-hidden group">
       {/* Header - clickable to expand */}
       <button
         onClick={() => { soundManager.playButtonClick(); setIsExpanded(!isExpanded); }}
-        className="w-full p-4 flex items-center justify-between hover:bg-indigo-100/50 transition-colors"
+        className="w-full p-4 flex items-center justify-between hover:bg-white/5 transition-colors"
       >
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-indigo-100 rounded-xl">
-            <FireIcon className="w-5 h-5 text-indigo-600" />
+          <div className="p-2 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl shadow-lg shadow-indigo-500/20">
+            <Swords className="w-5 h-5 text-white" />
           </div>
           <div className="text-left">
             <div className="flex items-center gap-2">
-              <h3 className="text-sm font-black text-indigo-800 uppercase tracking-wide">Daily Challenge</h3>
-              <span className="text-xs bg-indigo-100 text-indigo-600 px-2 py-0.5 rounded-full font-bold">{dailyQuestion.category}</span>
+              <h3 className="text-sm font-black text-white uppercase tracking-wide">Daily Challenge</h3>
+              <span className="text-[10px] bg-white/10 text-indigo-300 px-2 py-0.5 rounded-full font-bold border border-white/5 flex items-center gap-1">
+                {dailyQuestion.category}
+              </span>
             </div>
-            <p className="text-xs text-indigo-500 font-medium">Tap to test your knowledge!</p>
+            <p className="text-xs text-white/50 font-medium group-hover:text-white/80 transition-colors">Tap to test your knowledge!</p>
           </div>
         </div>
-        <div className={`text-2xl transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
-          ⬇️
+        <div className={`text-white/50 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}>
+          <ChevronDown className="w-5 h-5" />
         </div>
       </button>
 
       {/* Expanded question and options */}
       {isExpanded && (
         <div className="p-4 pt-0 animate-fadeIn">
-          <div className="bg-white rounded-xl p-4 border-2 border-indigo-100 mb-3">
-            <p className="text-lg font-bold text-slate-800 text-center">
+          <div className="bg-black/20 rounded-xl p-4 border border-white/5 mb-3">
+            <p className="text-lg font-bold text-white text-center">
               {dailyQuestion.question}
             </p>
           </div>
@@ -233,7 +248,7 @@ const DailyQuestionWidget: React.FC<DailyQuestionWidgetProps> = ({ quest, soundM
               <button
                 key={idx}
                 onClick={() => handleAnswer(option)}
-                className="p-3 bg-white hover:bg-indigo-50 border-2 border-indigo-100 hover:border-indigo-300 rounded-xl font-bold text-sm text-slate-700 transition-all active:scale-95"
+                className="p-3 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-indigo-400/50 rounded-xl font-bold text-sm text-white/80 transition-all active:scale-95 text-left"
               >
                 {option}
               </button>
@@ -1239,30 +1254,32 @@ const GameApp: React.FC = () => {
           </div>
         </div>
       ) : view === 'MENU' ? (
-        <div className="relative flex items-start justify-center min-h-screen p-4 overflow-hidden pt-[40vh]">
-          {/* Background Image */}
-          <div className="absolute inset-0 z-0">
+
+        <div className="relative flex flex-col justify-end min-h-screen p-4 overflow-hidden pb-12">
+          {/* Background Image - Fixed & Enhanced */}
+          <div className="fixed inset-0 z-0">
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/40 to-slate-900/40 z-10" />
             <img
-              src="/background.png"
+              src="/bg.jpg"
               alt="Background"
-              className="w-full h-full object-cover opacity-100"
+              className="w-full h-full object-cover object-top opacity-100 scale-105"
             />
           </div>
 
-          <div className="relative z-10 w-full max-w-lg">
+          <div className="relative z-10 w-full max-w-lg mx-auto">
 
             {/* Menu Buttons Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
               {/* Classic Mode - Occupies full width on mobile, half on desktop */}
             </div>
 
-            <div className="bg-white rounded-[2rem] border-b-8 border-slate-200 p-6 md:p-8 shadow-xl relative transition-all duration-300 ease-out">
+            <div className="p-2 relative transition-all duration-300 ease-out">
               {/* FIXED SIDEBAR - TOP RIGHT TOGGLEABLE */}
 
               {/* Toggle Button */}
               <button
                 onClick={() => { soundManager.playButtonClick(); setIsSidebarOpen(!isSidebarOpen); }}
-                className={`fixed top-4 right-4 z-[60] p-3 rounded-xl shadow-lg border-b-4 transition-all active:scale-95 active:border-b-0 active:translate-y-1 bg-white text-slate-700 border-slate-200 hover:text-indigo-600`}
+                className={`fixed top-4 right-4 z-[60] p-3 rounded-xl shadow-lg border-b-4 transition-all active:scale-95 active:border-b-0 active:translate-y-1 bg-black/20 text-white border-white/10 hover:bg-black/40 backdrop-blur-md hover:text-white hover:border-white/30`}
               >
                 {isSidebarOpen ? <XMarkIcon className="w-6 h-6" /> : <Bars3Icon className="w-6 h-6" />}
               </button>
@@ -1274,36 +1291,36 @@ const GameApp: React.FC = () => {
                   onClick={() => { soundManager.playButtonClick(); soundManager.toggleSound(); }}
                   className="group relative flex items-center justify-end"
                 >
-                  <span className="absolute right-14 bg-slate-900 text-white text-xs font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                  <span className="absolute right-14 bg-black/80 text-white text-xs font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none backdrop-blur-sm border border-white/10">
                     {soundManager.isSoundEnabled ? 'Mute Sound' : 'Enable Sound'}
                   </span>
-                  <div className={`p-3 rounded-xl shadow-lg border-b-4 transition-all active:scale-95 active:border-b-0 active:translate-y-1 ${soundManager.isSoundEnabled ? 'bg-white text-green-500 border-slate-200 hover:text-green-600' : 'bg-slate-100 text-slate-400 border-slate-300'}`}>
+                  <div className={`p-3 rounded-xl shadow-lg border-b-4 transition-all active:scale-95 active:border-b-0 active:translate-y-1 backdrop-blur-md border-white/5 ${soundManager.isSoundEnabled ? 'bg-black/40 text-green-400 hover:text-green-300 hover:bg-black/60' : 'bg-black/20 text-slate-500 hover:bg-black/30'}`}>
                     {soundManager.isSoundEnabled ? <SpeakerWaveIcon className="w-6 h-6" /> : <SpeakerXMarkIcon className="w-6 h-6" />}
                   </div>
                 </button>
 
-                <div className="h-px w-8 bg-slate-300 mx-auto my-1" />
+                <div className="h-px w-8 bg-white/20 mx-auto my-1" />
 
                 {/* Quests */}
                 <button
                   onClick={() => { soundManager.playButtonClick(); setShowQuests(true); setShowSettings(false); setShowMenu(false); setIsSidebarOpen(false); }}
-                  className="group relative flex flex-col items-center"
+                  className="group relative flex items-center justify-end"
                 >
-                  <div className="p-3 bg-white hover:bg-purple-50 text-slate-400 hover:text-purple-500 rounded-xl shadow-lg border-b-4 border-slate-200 hover:border-purple-200 transition-all active:scale-95 active:border-b-0 active:translate-y-1">
+                  <span className="absolute right-14 bg-black/80 text-white text-xs font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none backdrop-blur-sm border border-white/10">Quests</span>
+                  <div className="p-3 bg-black/40 hover:bg-black/60 text-white/70 hover:text-purple-400 rounded-xl shadow-lg border-b-4 border-white/5 hover:border-purple-500/30 transition-all active:scale-95 active:border-b-0 active:translate-y-1 backdrop-blur-md">
                     <FireIcon className="w-6 h-6" />
                   </div>
-                  <span className="mt-1 text-[10px] font-black uppercase text-slate-500 bg-white/80 backdrop-blur px-1.5 py-0.5 rounded shadow-sm">Quests</span>
                 </button>
 
                 {/* Grimoire */}
                 <button
                   onClick={() => { soundManager.playButtonClick(); setShowGrimoire(true); setShowSettings(false); setShowMenu(false); setIsSidebarOpen(false); }}
-                  className="group relative flex flex-col items-center"
+                  className="group relative flex items-center justify-end"
                 >
-                  <div className="p-3 bg-white hover:bg-indigo-50 text-slate-400 hover:text-indigo-500 rounded-xl shadow-lg border-b-4 border-slate-200 hover:border-indigo-200 transition-all active:scale-95 active:border-b-0 active:translate-y-1">
+                  <span className="absolute right-14 bg-black/80 text-white text-xs font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none backdrop-blur-sm border border-white/10">Grimoire</span>
+                  <div className="p-3 bg-black/40 hover:bg-black/60 text-white/70 hover:text-indigo-400 rounded-xl shadow-lg border-b-4 border-white/5 hover:border-indigo-500/30 transition-all active:scale-95 active:border-b-0 active:translate-y-1 backdrop-blur-md">
                     <BookOpenIcon className="w-6 h-6" />
                   </div>
-                  <span className="mt-1 text-[10px] font-black uppercase text-slate-500 bg-white/80 backdrop-blur px-1.5 py-0.5 rounded shadow-sm">Grimoire</span>
                 </button>
 
                 {/* Offline */}
@@ -1314,137 +1331,166 @@ const GameApp: React.FC = () => {
                     setView('OFFLINE_MENU');
                     setIsSidebarOpen(false);
                   }}
-                  className="group relative flex flex-col items-center"
+                  className="group relative flex items-center justify-end"
                 >
-                  <div className="p-3 bg-white hover:bg-slate-50 text-slate-400 hover:text-slate-600 rounded-xl shadow-lg border-b-4 border-slate-200 hover:border-slate-300 transition-all active:scale-95 active:border-b-0 active:translate-y-1">
+                  <span className="absolute right-14 bg-black/80 text-white text-xs font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none backdrop-blur-sm border border-white/10">Offline</span>
+                  <div className="p-3 bg-black/40 hover:bg-black/60 text-white/70 hover:text-sky-400 rounded-xl shadow-lg border-b-4 border-white/5 hover:border-sky-500/30 transition-all active:scale-95 active:border-b-0 active:translate-y-1 backdrop-blur-md">
                     <WifiIcon className="w-6 h-6" />
                   </div>
-                  <span className="mt-1 text-[10px] font-black uppercase text-slate-500 bg-white/80 backdrop-blur px-1.5 py-0.5 rounded shadow-sm">Offline</span>
                 </button>
 
                 {/* Stats */}
                 <button
                   onClick={() => { soundManager.playButtonClick(); setShowStats(true); setShowSettings(false); setIsSidebarOpen(false); }}
-                  className="group relative flex flex-col items-center"
+                  className="group relative flex items-center justify-end"
                 >
-                  <div className="p-3 bg-white hover:bg-amber-50 text-slate-400 hover:text-amber-500 rounded-xl shadow-lg border-b-4 border-slate-200 hover:border-amber-200 transition-all active:scale-95 active:border-b-0 active:translate-y-1">
+                  <span className="absolute right-14 bg-black/80 text-white text-xs font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none backdrop-blur-sm border border-white/10">Stats</span>
+                  <div className="p-3 bg-black/40 hover:bg-black/60 text-white/70 hover:text-amber-400 rounded-xl shadow-lg border-b-4 border-white/5 hover:border-amber-500/30 transition-all active:scale-95 active:border-b-0 active:translate-y-1 backdrop-blur-md">
                     <TrophyIcon className="w-6 h-6" />
                   </div>
-                  <span className="mt-1 text-[10px] font-black uppercase text-slate-500 bg-white/80 backdrop-blur px-1.5 py-0.5 rounded shadow-sm">Stats</span>
                 </button>
 
-                <div className="h-px w-8 bg-slate-300 mx-auto my-1" />
+                <div className="h-px w-8 bg-white/20 mx-auto my-1" />
 
                 {/* Settings */}
                 <button
                   onClick={() => { soundManager.playButtonClick(); setShowSettings(true); setShowStats(false); setIsSidebarOpen(false); }}
-                  className="group relative flex flex-col items-center"
+                  className="group relative flex items-center justify-end"
                 >
-                  <div className="p-3 bg-white hover:bg-sky-50 text-slate-400 hover:text-sky-500 rounded-xl shadow-lg border-b-4 border-slate-200 hover:border-sky-200 transition-all active:scale-95 active:border-b-0 active:translate-y-1">
+                  <span className="absolute right-14 bg-black/80 text-white text-xs font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none backdrop-blur-sm border border-white/10">Settings</span>
+                  <div className="p-3 bg-black/40 hover:bg-black/60 text-white/70 hover:text-sky-400 rounded-xl shadow-lg border-b-4 border-white/5 hover:border-sky-500/30 transition-all active:scale-95 active:border-b-0 active:translate-y-1 backdrop-blur-md">
                     <Cog6ToothIcon className="w-6 h-6" />
                   </div>
-                  <span className="mt-1 text-[10px] font-black uppercase text-slate-500 bg-white/80 backdrop-blur px-1.5 py-0.5 rounded shadow-sm">Settings</span>
                 </button>
 
                 {/* Logout */}
                 <button
                   onClick={() => { soundManager.playButtonClick(); logout(); }}
-                  className="group relative flex flex-col items-center"
+                  className="group relative flex items-center justify-end"
                 >
-                  <div className="p-3 bg-white hover:bg-red-50 text-slate-400 hover:text-red-500 rounded-xl shadow-lg border-b-4 border-slate-200 hover:border-red-200 transition-all active:scale-95 active:border-b-0 active:translate-y-1">
+                  <span className="absolute right-14 bg-black/80 text-white text-xs font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none backdrop-blur-sm border border-white/10">Sign Out</span>
+                  <div className="p-3 bg-black/40 hover:bg-black/60 text-white/70 hover:text-red-400 rounded-xl shadow-lg border-b-4 border-white/5 hover:border-red-500/30 transition-all active:scale-95 active:border-b-0 active:translate-y-1 backdrop-blur-md">
                     <ArrowLeftOnRectangleIcon className="w-6 h-6" />
                   </div>
-                  <span className="mt-1 text-[10px] font-black uppercase text-slate-500 bg-white/80 backdrop-blur px-1.5 py-0.5 rounded shadow-sm">Sign Out</span>
-                </button>
-              </div>
+                </button >
+              </div >
 
               {/* Backdrop to close menu */}
-              {showMenu && !showSettings && !showStats && (
-                <div
-                  className="fixed inset-0 z-0"
-                  onClick={() => setShowMenu(false)}
-                />
-              )}
+              {
+                showMenu && !showSettings && !showStats && (
+                  <div
+                    className="fixed inset-0 z-0"
+                    onClick={() => setShowMenu(false)}
+                  />
+                )
+              }
 
-              {!showSettings && !showStats && (
-                <div className="mb-6 flex gap-3">
-                  <button
-                    onClick={() => { soundManager.playButtonClick(); setGameMode('RAID'); setView('RAID_SETUP'); }}
-                    className="flex-1 py-3 bg-purple-500 hover:bg-purple-400 text-white border-b-4 border-purple-700 rounded-xl font-bold text-sm uppercase tracking-wider shadow-lg flex items-center justify-center gap-2 transform active:scale-95 transition-all"
-                  >
-                    <UserGroupIcon className="w-5 h-5" /> Raid
-                  </button>
-                  <button
-                    onClick={() => { soundManager.playButtonClick(); setGameMode('PVP'); setView('COMPETITION_SETUP'); }}
-                    className="flex-1 py-3 bg-red-500 hover:bg-red-400 text-white border-b-4 border-red-700 rounded-xl font-bold text-sm uppercase tracking-wider shadow-lg flex items-center justify-center gap-2 transform active:scale-95 transition-all"
-                  >
-                    <Swords className="w-5 h-5" /> 1v1 Battle
-                  </button>
-                </div>
-              )}
+              {
+                !showSettings && !showStats && (
+                  <div className="mb-6 flex gap-3">
+                    <button
+                      onClick={() => { soundManager.playButtonClick(); setGameMode('RAID'); setView('RAID_SETUP'); }}
+                      className="flex-1 py-3 bg-purple-500 hover:bg-purple-400 text-white border-b-4 border-purple-700 rounded-xl font-bold text-sm uppercase tracking-wider shadow-lg flex items-center justify-center gap-2 transform active:scale-95 transition-all"
+                    >
+                      <UserGroupIcon className="w-5 h-5" /> Raid
+                    </button>
+                    <button
+                      onClick={() => { soundManager.playButtonClick(); setGameMode('PVP'); setView('COMPETITION_SETUP'); }}
+                      className="flex-1 py-3 bg-red-500 hover:bg-red-400 text-white border-b-4 border-red-700 rounded-xl font-bold text-sm uppercase tracking-wider shadow-lg flex items-center justify-center gap-2 transform active:scale-95 transition-all"
+                    >
+                      <Swords className="w-5 h-5" /> 1v1 Battle
+                    </button>
+                  </div>
+                )
+              }
               {/* Resume Game Modal */}
-              {showResumeModal && savedGameData && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
-                  <div className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl animate-fadeIn">
-                    <h2 className="text-2xl font-black text-slate-800 mb-4">Continue Your Battle?</h2>
-                    <p className="text-slate-600 mb-2">
-                      You have a saved game from{' '}
-                      <span className="font-bold">
-                        {new Date(savedGameData.timestamp).toLocaleString()}
-                      </span>
-                    </p>
-                    <p className="text-slate-500 text-sm mb-6">
-                      Topic: <span className="font-bold">{savedGameData.gameState.topic_title || 'Unknown'}</span>
-                      {' • '}
-                      Turn {savedGameData.gameState.stats.current_turn_index + 1} of {savedGameData.gameState.stats.total_turns}
-                      {' • '}
-                      HP: {savedGameData.gameState.stats.player_hp}/{savedGameData.gameState.stats.player_max_hp}
-                    </p>
-                    <div className="flex gap-3">
-                      <button
-                        onClick={handleResumeGame}
-                        className="flex-1 bg-green-500 hover:bg-green-400 active:bg-green-600 text-white border-b-4 border-green-700 active:border-b-0 active:translate-y-1 rounded-xl py-3 font-bold uppercase tracking-wide transition-all"
-                      >
-                        Resume
-                      </button>
-                      <button
-                        onClick={handleStartNewGame}
-                        className="flex-1 bg-slate-200 hover:bg-slate-300 active:bg-slate-400 text-slate-700 border-b-4 border-slate-400 active:border-b-0 active:translate-y-1 rounded-xl py-3 font-bold uppercase tracking-wide transition-all"
-                      >
-                        New Game
-                      </button>
+              {
+                showResumeModal && savedGameData && (
+                  <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
+                    <div className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl animate-fadeIn">
+                      <h2 className="text-2xl font-black text-slate-800 mb-4">Continue Your Battle?</h2>
+                      <p className="text-slate-600 mb-2">
+                        You have a saved game from{' '}
+                        <span className="font-bold">
+                          {new Date(savedGameData.timestamp).toLocaleString()}
+                        </span>
+                      </p>
+                      <p className="text-slate-500 text-sm mb-6">
+                        Topic: <span className="font-bold">{savedGameData.gameState.topic_title || 'Unknown'}</span>
+                        {' • '}
+                        Turn {savedGameData.gameState.stats.current_turn_index + 1} of {savedGameData.gameState.stats.total_turns}
+                        {' • '}
+                        HP: {savedGameData.gameState.stats.player_hp}/{savedGameData.gameState.stats.player_max_hp}
+                      </p>
+                      <div className="flex gap-3">
+                        <button
+                          onClick={handleResumeGame}
+                          className="flex-1 bg-green-500 hover:bg-green-400 active:bg-green-600 text-white border-b-4 border-green-700 active:border-b-0 active:translate-y-1 rounded-xl py-3 font-bold uppercase tracking-wide transition-all"
+                        >
+                          Resume
+                        </button>
+                        <button
+                          onClick={handleStartNewGame}
+                          className="flex-1 bg-slate-200 hover:bg-slate-300 active:bg-slate-400 text-slate-700 border-b-4 border-slate-400 active:border-b-0 active:translate-y-1 rounded-xl py-3 font-bold uppercase tracking-wide transition-all"
+                        >
+                          New Game
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
+                )
+              }
 
               {/* Grimoire Modal */}
-              {showGrimoire && (
-                <GrimoireModal onClose={() => setShowGrimoire(false)} />
-              )}
+              {
+                showGrimoire && (
+                  <GrimoireModal onClose={() => setShowGrimoire(false)} />
+                )
+              }
+
+              {/* Quests Modal */}
+              {
+                showQuests && (
+                  <QuestsModal
+                    quests={quests}
+                    onClose={() => setShowQuests(false)}
+                  />
+                )
+              }
 
               {/* Daily Challenge - Single Question */}
-              {!showSettings && !showStats && quests.length > 0 && (
-                <DailyQuestionWidget
-                  quest={quests[0]}
-                  soundManager={soundManager}
-                  onComplete={() => {
-                    updateQuestProgress('TOTAL_CORRECT', 1);
-                  }}
-                />
-              )}
+              {
+                !showSettings && !showStats && quests.length > 0 && (
+                  <DailyQuestionWidget
+                    quest={quests[0]}
+                    soundManager={soundManager}
+                    onComplete={() => {
+                      updateQuestProgress('TOTAL_CORRECT', 1);
+                    }}
+                  />
+                )
+              }
 
               <form onSubmit={(e) => { e.preventDefault(); handleStartGame(); }} className="space-y-6">
 
                 {showSettings ? (
-                  <div className="space-y-6 animate-fadeIn mt-10">
-                    <h3 className="text-xl font-black text-slate-800 uppercase tracking-wide border-b-2 border-slate-100 pb-2">Game Settings</h3>
+                  <div className="space-y-6 animate-fadeIn mt-6 bg-black/60 backdrop-blur-xl rounded-2xl p-6 border border-white/10 shadow-[0_0_40px_rgba(0,0,0,0.5)] ring-1 ring-white/10 relative overflow-hidden">
+                    <div className="flex justify-between items-center border-b border-white/10 pb-4">
+                      <h3 className="text-xl font-black text-white uppercase tracking-wide">Game Settings</h3>
+                      <button
+                        type="button"
+                        onClick={() => setShowSettings(false)}
+                        className="p-1 hover:bg-white/10 rounded-full text-white/50 hover:text-white transition-colors"
+                      >
+                        <XMarkIcon className="w-6 h-6" />
+                      </button>
+                    </div>
 
                     {/* Number of Questions Slider */}
                     <div>
-                      <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-4 flex justify-between">
+                      <label className="block text-xs font-black text-white/60 uppercase tracking-widest mb-4 flex justify-between">
                         <span>Questions</span>
-                        <span className="text-sky-600 bg-sky-100 px-2 py-0.5 rounded text-sm">{numQuestions}</span>
+                        <span className="text-sky-300 bg-sky-500/20 px-2 py-0.5 rounded text-sm border border-sky-500/30">{numQuestions}</span>
                       </label>
                       <input
                         type="range"
@@ -1453,9 +1499,9 @@ const GameApp: React.FC = () => {
                         step="1"
                         value={numQuestions}
                         onChange={(e) => setNumQuestions(Number(e.target.value))}
-                        className="w-full h-4 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-slate-500"
+                        className="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer accent-sky-500"
                       />
-                      <div className="flex justify-between text-[10px] text-slate-400 font-bold mt-2">
+                      <div className="flex justify-between text-[10px] text-white/40 font-bold mt-2">
                         <span>Short (3)</span>
                         <span>Epic (10)</span>
                       </div>
@@ -1463,20 +1509,20 @@ const GameApp: React.FC = () => {
 
                     {/* Difficulty */}
                     <div>
-                      <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Questions Difficulty</label>
+                      <label className="block text-xs font-black text-white/60 uppercase tracking-widest mb-2">Questions Difficulty</label>
                       <div className="grid grid-cols-3 gap-2">
                         {(['EASY', 'NORMAL', 'HARD'] as Difficulty[]).map(d => {
                           const colors = {
-                            EASY: difficulty === d ? 'bg-green-500 border-green-700 text-white translate-y-1 border-b-0' : 'bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200',
-                            NORMAL: difficulty === d ? 'bg-orange-500 border-orange-700 text-white translate-y-1 border-b-0' : 'bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200',
-                            HARD: difficulty === d ? 'bg-red-500 border-red-700 text-white translate-y-1 border-b-0' : 'bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200'
+                            EASY: difficulty === d ? 'bg-emerald-500 text-white shadow-[0_0_15px_rgba(16,185,129,0.4)] border border-emerald-400' : 'bg-white/5 text-white/60 border border-white/10 hover:bg-white/10',
+                            NORMAL: difficulty === d ? 'bg-orange-500 text-white shadow-[0_0_15px_rgba(249,115,22,0.4)] border border-orange-400' : 'bg-white/5 text-white/60 border border-white/10 hover:bg-white/10',
+                            HARD: difficulty === d ? 'bg-rose-500 text-white shadow-[0_0_15px_rgba(244,63,94,0.4)] border border-rose-400' : 'bg-white/5 text-white/60 border border-white/10 hover:bg-white/10'
                           };
                           return (
                             <button
                               key={d}
                               type="button"
                               onClick={() => { soundManager.playButtonClick(); setDifficulty(d); }}
-                              className={`py-3 rounded-xl font-black text-xs md:text-sm border-b-4 transition-all ${colors[d]}`}
+                              className={`py-3 rounded-xl font-bold text-xs md:text-sm transition-all ${colors[d]}`}
                             >
                               {d}
                             </button>
@@ -1487,19 +1533,19 @@ const GameApp: React.FC = () => {
 
                     {/* Player Customization */}
                     <div>
-                      <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-3">Player Customization</label>
+                      <label className="block text-xs font-black text-white/60 uppercase tracking-widest mb-3">Player Customization</label>
 
                       {/* Gender */}
                       <div className="grid grid-cols-4 gap-2 mb-3">
                         {(['RANDOM', 'MALE', 'FEMALE', 'NON_BINARY'] as Gender[]).map(g => {
                           const getGenderStyle = () => {
-                            if (gender !== g) return 'bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200';
+                            if (gender !== g) return 'bg-white/5 border border-white/10 text-white/60 hover:bg-white/10';
                             switch (g) {
-                              case 'RANDOM': return 'bg-slate-500 border-slate-700 text-white translate-y-1 border-b-0';
-                              case 'MALE': return 'bg-blue-500 border-blue-700 text-white translate-y-1 border-b-0';
-                              case 'FEMALE': return 'bg-pink-500 border-pink-700 text-white translate-y-1 border-b-0';
-                              case 'NON_BINARY': return 'bg-gradient-to-r from-red-500 via-yellow-400 via-green-500 via-blue-500 to-purple-500 border-purple-700 text-white translate-y-1 border-b-0';
-                              default: return 'bg-slate-100 border-slate-200 text-slate-600';
+                              case 'RANDOM': return 'bg-slate-600 text-white border border-slate-400 shadow-[0_0_10px_rgba(148,163,184,0.4)]';
+                              case 'MALE': return 'bg-blue-600 text-white border border-blue-400 shadow-[0_0_10px_rgba(37,99,235,0.4)]';
+                              case 'FEMALE': return 'bg-pink-600 text-white border border-pink-400 shadow-[0_0_10px_rgba(219,39,119,0.4)]';
+                              case 'NON_BINARY': return 'bg-gradient-to-r from-red-500 via-yellow-400 via-green-500 via-blue-500 to-purple-500 text-white border border-purple-400';
+                              default: return '';
                             }
                           };
                           return (
@@ -1507,7 +1553,7 @@ const GameApp: React.FC = () => {
                               key={g}
                               type="button"
                               onClick={() => { soundManager.playButtonClick(); setGender(g); }}
-                              className={`py-2 rounded-xl font-bold text-xs border-b-4 transition-all ${getGenderStyle()}`}
+                              className={`py-2 rounded-xl font-bold text-[10px] md:text-xs transition-all ${getGenderStyle()}`}
                             >
                               {g === 'RANDOM' ? 'Random' : g === 'MALE' ? 'Male' : g === 'FEMALE' ? 'Female' : 'Non-binary'}
                             </button>
@@ -1517,7 +1563,7 @@ const GameApp: React.FC = () => {
 
                       {/* Age */}
                       <div className="mb-3">
-                        <label className="block text-[10px] font-bold text-slate-400 mb-2">AGE</label>
+                        <label className="block text-[10px] font-bold text-white/40 mb-2">AGE</label>
                         <div className="flex items-center gap-3">
                           <input
                             type="range"
@@ -1529,9 +1575,9 @@ const GameApp: React.FC = () => {
                               if (randomAge) setRandomAge(false);
                               setAge(Number(e.target.value));
                             }}
-                            className={`flex-1 h-3 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-slate-500 ${randomAge ? 'opacity-40' : ''}`}
+                            className={`flex-1 h-2 bg-white/10 rounded-lg appearance-none cursor-pointer accent-white ${randomAge ? 'opacity-40' : ''}`}
                           />
-                          <span className={`text-sm font-bold min-w-[3ch] text-right ${randomAge ? 'text-sky-300' : 'text-sky-600'}`}>
+                          <span className={`text-sm font-bold min-w-[3ch] text-right ${randomAge ? 'text-sky-300' : 'text-white'}`}>
                             {randomAge ? '?' : age}
                           </span>
                           <label className="flex items-center gap-1.5 cursor-pointer">
@@ -1543,20 +1589,20 @@ const GameApp: React.FC = () => {
                                 setRandomAge(e.target.checked);
                                 if (e.target.checked) setAge(10);
                               }}
-                              className="w-4 h-4 accent-slate-500 rounded"
+                              className="w-4 h-4 accent-sky-500 rounded bg-white/10 border-white/20"
                             />
-                            <span className="text-[10px] font-bold text-slate-400">Random</span>
+                            <span className="text-[10px] font-bold text-white/60">Random</span>
                           </label>
                         </div>
                       </div>
 
                       {/* Ethnicity */}
                       <div>
-                        <label className="block text-[10px] font-bold text-slate-400 mb-1">ETHNICITY</label>
+                        <label className="block text-[10px] font-bold text-white/40 mb-1">ETHNICITY</label>
                         <select
                           value={ethnicity}
                           onChange={(e) => { setEthnicity(e.target.value); }}
-                          className="w-full bg-slate-100 border-2 border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-700 focus:border-slate-400 outline-none"
+                          className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 font-bold text-white focus:border-indigo-400 outline-none hover:bg-black/60 transition-colors"
                         >
                           <option value="Random">Random</option>
                           <option value="Asian">Asian</option>
@@ -1568,10 +1614,10 @@ const GameApp: React.FC = () => {
                       </div>
 
                       {/* Ghosts of Battles Past Toggle */}
-                      <div className="flex items-center justify-between mt-4 p-3 bg-slate-100 rounded-xl border border-slate-200">
+                      <div className="flex items-center justify-between mt-4 p-3 bg-white/5 rounded-xl border border-white/10 hover:bg-white/10 transition-colors">
                         <div className="flex items-center gap-2">
-                          <BookOpenIcon className="w-5 h-5 text-slate-500" />
-                          <label htmlFor="useGhosts" className="text-sm font-bold text-slate-700 cursor-pointer">
+                          <BookOpenIcon className="w-5 h-5 text-indigo-300" />
+                          <label htmlFor="useGhosts" className="text-sm font-bold text-white cursor-pointer select-none">
                             Ghosts of Battles Past
                           </label>
                         </div>
@@ -1586,10 +1632,10 @@ const GameApp: React.FC = () => {
                               setUseGhosts(e.target.checked);
                             }}
                           />
-                          <div className="w-11 h-6 bg-slate-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-sky-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-sky-500"></div>
+                          <div className="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-500"></div>
                         </label>
                       </div>
-                      <p className="text-xs text-slate-500 mt-1 px-1">
+                      <p className="text-xs text-white/40 mt-1 px-1">
                         {useGhosts ? `AI will use your ${shards.length} past missed questions to generate new ones.` : 'AI will not use your past missed questions.'}
                       </p>
                     </div>
@@ -1597,33 +1643,34 @@ const GameApp: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => { soundManager.playButtonClick(); setShowSettings(false); }}
-                      className="w-full py-3 bg-green-500 hover:bg-green-400 text-white border-b-4 border-green-700 rounded-xl font-bold text-sm transition-all active:border-b-0 active:translate-y-1"
+                      className="w-full py-3 bg-emerald-500 hover:bg-emerald-400 text-white border-b-4 border-emerald-700 rounded-xl font-bold text-sm transition-all active:border-b-0 active:translate-y-1 shadow-[0_0_20px_rgba(16,185,129,0.3)]"
                     >
                       Save Settings
                     </button>
 
-                    <p className="text-center text-[10px] text-slate-400 mt-4">
-                      Made by <span className="font-bold">Caio Pedroso</span> with Google AI Studio
+                    <p className="text-center text-[10px] text-white/20 mt-4">
+                      Made by <span className="font-bold text-white/40">Caio Pedroso</span> with Google AI Studio
                     </p>
                   </div>
                 ) : showStats ? (
                   <StatsPanel
                     stats={playerStats}
                     onStatsChange={setPlayerStats}
+                    onClose={() => setShowStats(false)}
                   />
                 ) : (
                   <>
                     {/* Main Input Form */}
-                    <div className="animate-fadeIn space-y-6 mt-10">
+                    <div className="animate-fadeIn space-y-6 mt-4">
                       <div>
-                        <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-3 ml-2">What are we learning?</label>
+                        <label className="block text-xs font-black text-white/90 uppercase tracking-widest mb-3 ml-2 drop-shadow-md">What are we learning?</label>
 
                         {/* Smart Input Container */}
                         <div
-                          className={`w-full border-b-4 rounded-2xl px-6 py-4 font-bold text-lg transition-all flex flex-wrap gap-2 items-center
+                          className={`w-full border-b-4 rounded-2xl px-6 py-4 font-bold text-lg transition-all flex flex-wrap gap-2 items-center backdrop-blur-md
                                     ${file
-                              ? 'bg-slate-100 border-slate-200 cursor-not-allowed'
-                              : 'bg-slate-100 border-slate-200 focus-within:border-sky-400 focus-within:bg-white'
+                              ? 'bg-slate-800/80 border-slate-600 cursor-not-allowed'
+                              : 'bg-black/40 border-white/20 hover:bg-black/50 focus-within:bg-black/60 focus-within:border-sky-400 focus-within:ring-2 focus-within:ring-sky-500/50 focus-within:shadow-[0_0_15px_rgba(14,165,233,0.3)] text-white'
                             }`}
                         >
                           {/* Pasted Content Chip */}
@@ -1649,7 +1696,7 @@ const GameApp: React.FC = () => {
                             onChange={(e) => setTopic(e.target.value)}
                             onPaste={handlePaste}
                             placeholder={file ? "Using File Context..." : pastedContent ? "Add instruction (e.g. 'Make it hard')..." : "Type a topic or paste your notes..."}
-                            className={`flex-grow bg-transparent outline-none placeholder-slate-400 text-slate-800 min-w-[50%]`}
+                            className={`flex-grow bg-transparent outline-none placeholder-white/50 text-white min-w-[50%]`}
                           />
                         </div>
                       </div>
@@ -1661,10 +1708,10 @@ const GameApp: React.FC = () => {
                         <label className="flex-1 cursor-pointer group">
                           <input type="file" accept="image/*,application/pdf" onChange={handleFileChange} disabled={loading} className="hidden" />
                           <div className={`
-                                flex items-center justify-center gap-2 p-3 rounded-xl border-2 border-dashed transition-all
+                                flex items-center justify-center gap-2 p-3 rounded-xl border-2 border-dashed transition-all backdrop-blur-sm
                                 ${file
-                              ? 'bg-sky-50 border-sky-300 text-sky-600 shadow-md'
-                              : 'bg-slate-50 border-slate-200 text-slate-400 hover:border-sky-300 hover:text-sky-500 hover:bg-white'}
+                              ? 'bg-sky-500/20 border-sky-400 text-sky-200'
+                              : 'bg-white/5 border-white/30 text-white/60 hover:border-sky-400 hover:text-white hover:bg-white/10'}
                             `}>
                             {file ? (
                               <>
@@ -1687,7 +1734,7 @@ const GameApp: React.FC = () => {
                       <button
                         type="submit"
                         disabled={loading || (!topic && !file && !pastedContent)}
-                        className="relative w-full bg-green-500 hover:bg-green-400 active:bg-green-600 text-white border-b-8 border-green-700 active:border-b-0 active:translate-y-2 rounded-2xl py-4 font-black text-xl uppercase tracking-widest transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center shadow-lg overflow-hidden"
+                        className="relative w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-400 hover:to-emerald-500 text-white border-b-4 border-emerald-800/50 active:border-b-0 active:translate-y-1 rounded-2xl py-4 font-black text-xl uppercase tracking-widest transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center shadow-[0_0_20px_rgba(34,197,94,0.4)] hover:shadow-[0_0_30px_rgba(34,197,94,0.6)] overflow-hidden"
                       >
                         {loading && (
                           <div className="absolute left-6 top-1/2 -translate-y-1/2">
@@ -1709,7 +1756,7 @@ const GameApp: React.FC = () => {
                         type="button"
                         onClick={handleOpenLobby}
                         disabled={loading || (!topic && !file && !pastedContent)}
-                        className="w-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-purple-600 border-b-4 border-slate-300 hover:border-purple-300 active:border-b-0 active:translate-y-2 rounded-2xl py-3 font-bold text-sm uppercase tracking-widest transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                        className="w-full bg-white/10 hover:bg-white/20 text-white hover:text-purple-300 border-b-4 border-white/20 hover:border-purple-400/50 active:border-b-0 active:translate-y-2 rounded-2xl py-3 font-bold text-sm uppercase tracking-widest transition-all disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center gap-2 backdrop-blur-sm"
                       >
                         <UserGroupIcon className="w-5 h-5" />
                         <span>Start Co-op Raid</span>
@@ -1738,14 +1785,14 @@ const GameApp: React.FC = () => {
                 )}
 
               </form>
-            </div>
+            </div >
 
-            <p className="text-center text-xs font-bold text-slate-300 mt-8 uppercase tracking-widest">
+            <p className="text-center text-xs font-bold text-white/30 mt-8 uppercase tracking-widest drop-shadow-sm">
               Powered by Google Gemini
             </p>
 
-          </div>
-        </div>
+          </div >
+        </div >
       ) : gameState ? (
         <GameScreen
           gameState={gameState}
@@ -1766,17 +1813,19 @@ const GameApp: React.FC = () => {
       }
 
       {/* Global Loading Overlay */}
-      {loading && loadingProgress && (
-        <div className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-[2rem] p-8 max-w-md w-full shadow-2xl animate-scaleUp">
-            <div className="mb-4 text-center">
-              <SparklesIcon className="w-12 h-12 text-indigo-500 mx-auto animate-spin" />
-              <h2 className="text-xl font-black text-slate-800 mt-4 uppercase tracking-widest">Generating Game</h2>
+      {
+        loading && loadingProgress && (
+          <div className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+            <div className="bg-white rounded-[2rem] p-8 max-w-md w-full shadow-2xl animate-scaleUp">
+              <div className="mb-4 text-center">
+                <SparklesIcon className="w-12 h-12 text-indigo-500 mx-auto animate-spin" />
+                <h2 className="text-xl font-black text-slate-800 mt-4 uppercase tracking-widest">Generating Game</h2>
+              </div>
+              <LoadingProgress progress={loadingProgress} />
             </div>
-            <LoadingProgress progress={loadingProgress} />
           </div>
-        </div>
-      )}
+        )
+      }
     </div >
   );
 };
