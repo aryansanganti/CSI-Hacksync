@@ -1,14 +1,20 @@
-import React, { useState, useRef } from 'react';
-import { GameState, GameStatus, TurnContent, Difficulty, Gender, PlayerStats, LoadingProgress as LoadingProgressType, PreloadedTurn } from './types';
+import React, { useState, useRef, useEffect } from 'react';
+import { GameState, GameStatus, TurnContent, Difficulty, Gender, PlayerStats, LoadingProgress as LoadingProgressType, PreloadedTurn, CompetitionRoomState } from './types';
 import { initializeGame, generateGameImage } from './services/geminiService';
 import { loadStats, recordGameStart, recordTurnResult, recordGameEnd } from './services/statsService';
 import { GameScreen } from './components/GameScreen';
 import { StatsPanel } from './components/StatsPanel';
 import { LoadingProgress } from './components/LoadingProgress';
 import { LobbyScreen } from './components/LobbyScreen';
+import { CompetitionSetup } from './components/CompetitionSetup';
+import { CompetitionGameScreen } from './components/CompetitionGameScreen';
 import { SparklesIcon, PhotoIcon, Cog6ToothIcon, DocumentTextIcon, XMarkIcon, ClipboardDocumentListIcon, TrophyIcon, Bars3Icon, SpeakerWaveIcon, SpeakerXMarkIcon, UserGroupIcon } from '@heroicons/react/24/solid';
 import { Swords } from 'lucide-react';
 import { useSoundManager } from './hooks/useSoundManager';
+import { useMultiplayer } from './hooks/useMultiplayer';
+import { generateDailyQuests } from './services/geminiService';
+import { Quest } from './types';
+import { FireIcon, CheckCircleIcon } from '@heroicons/react/24/solid';
 
 // Error popup for quota/rate limit errors
 interface ApiError {
@@ -19,11 +25,13 @@ interface ApiError {
 
 const App: React.FC = () => {
   const [gameState, setGameState] = useState<GameState | null>(null);
-  const [view, setView] = useState<'MENU' | 'GAME' | 'LOBBY'>('MENU');
+  const [view, setView] = useState<'MENU' | 'GAME' | 'LOBBY' | 'COMPETITION_SETUP' | 'COMPETITION_GAME'>('MENU');
   const [raidFriends, setRaidFriends] = useState<string[]>([]);
+  const [competitionRoom, setCompetitionRoom] = useState<CompetitionRoomState | null>(null);
 
   // Sound Manager
   const soundManager = useSoundManager();
+  const multiplayer = useMultiplayer();
 
   const [loading, setLoading] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState<LoadingProgressType | null>(null);
@@ -45,6 +53,8 @@ const App: React.FC = () => {
   const [showSettings, setShowSettings] = useState(false);
   const [showStats, setShowStats] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
+  const [showQuests, setShowQuests] = useState(false);
+  const [quests, setQuests] = useState<Quest[]>([]);
 
   // Player Stats
   const [playerStats, setPlayerStats] = useState<PlayerStats>(() => loadStats());
@@ -64,6 +74,59 @@ const App: React.FC = () => {
 
   // Abort controller for cancelling background operations
   const abortControllerRef = useRef<AbortController | null>(null);
+
+  // --- QUESTS INITIALIZATION ---
+  useEffect(() => {
+    const initQuests = async () => {
+      const today = new Date().toISOString().split('T')[0];
+      const storageKey = `battlenotes_quests_${today}`;
+      const savedQuests = localStorage.getItem(storageKey);
+
+      if (savedQuests) {
+        setQuests(JSON.parse(savedQuests));
+      } else {
+        try {
+          const newQuests = await generateDailyQuests();
+          setQuests(newQuests);
+          localStorage.setItem(storageKey, JSON.stringify(newQuests));
+        } catch (e) {
+          console.error("Failed to init quests", e);
+        }
+      }
+    };
+    initQuests();
+  }, []);
+
+  const updateQuestProgress = (type: Quest['type'], amount: number, contextTopic?: string) => {
+    setQuests(prev => {
+      const updated = prev.map(q => {
+        if (q.isCompleted) return q;
+
+        let match = false;
+        if (q.type === 'TOTAL_CORRECT' && type === 'TOTAL_CORRECT') match = true;
+        if (q.type === 'STREAK' && type === 'STREAK') match = true;
+        if (q.type === 'TOPIC_ACCURACY' && type === 'TOPIC_ACCURACY' && contextTopic && q.topic) {
+          if (contextTopic.toLowerCase().includes(q.topic.toLowerCase()) || q.topic.toLowerCase().includes(contextTopic.toLowerCase())) {
+            match = true;
+          }
+        }
+
+        if (match) {
+          const newProgress = Math.min(q.target, q.progress + amount);
+          const isCompleted = newProgress >= q.target;
+          if (isCompleted && !q.isCompleted) {
+            soundManager.playVictory();
+          }
+          return { ...q, progress: newProgress, isCompleted };
+        }
+        return q;
+      });
+
+      const today = new Date().toISOString().split('T')[0];
+      localStorage.setItem(`battlenotes_quests_${today}`, JSON.stringify(updated));
+      return updated;
+    });
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -308,6 +371,58 @@ const App: React.FC = () => {
     }
   };
 
+  const competitionTurns = useRef<TurnContent[]>([]);
+
+  // --- COMPETITION LOGIC ---
+  const handleCompetitionStart = async (roomState: CompetitionRoomState) => {
+    // For competition, we'll quickly generate a game or use a pre-set one.
+    // For now, let's reuse initialization but with a "fast" flag or similar, 
+    // OR just generate a game with the room's settings.
+    setCompetitionRoom(roomState);
+
+    // Trigger generation (similar to handleStartGame but specific for competition)
+    // We'll reuse the existing flow but redirect to COMPETITION_GAME
+
+    setLoading(true);
+    setLoadingProgress({ step: 'Preparing Battle...', current: 0, total: 100, percentage: 50 });
+
+    try {
+      const initParams = {
+        topic: roomState.topic,
+        difficulty: roomState.difficulty,
+        numQuestions: 10, // Fixed for battle
+        gender: 'RANDOM' as Gender,
+        age: '18',
+        ethnicity: 'Random',
+        mode: 'SOLO' as const // The mock component handles the "opponent" visually
+      };
+
+      const manifest = await initializeGame(initParams);
+      setGameState(manifest.gameState);
+      competitionTurns.current = manifest.allTurns; // Store all turns for instant switching
+
+      // Skip heavy image generation for speed? Or just generate one bg/boss?
+      // Let's generate just the essentials
+      const bgImg = await generateGameImage(manifest.gameState.theme.background_visual_prompt, true);
+      setBackgroundImage(bgImg);
+
+      setView('COMPETITION_GAME');
+    } catch (e) {
+      console.error("Competition Init Error", e);
+      alert("Failed to start battle. Please try again.");
+    } finally {
+      setLoading(false);
+      setLoadingProgress(null);
+    }
+  };
+
+  const handleCompetitionEnd = (winnerId: string, pScore: number, oScore: number) => {
+    // Record stats?
+    setView('MENU');
+    setCompetitionRoom(null);
+  };
+
+
   // --- 2. CLIENT SIDE GAME LOGIC ---
   const handleAction = (answer: string, isCorrect: boolean) => {
     if (!gameState) return;
@@ -348,6 +463,30 @@ const App: React.FC = () => {
 
     // Track turn result
     const newStreak = isCorrect ? gameState.stats.streak + 1 : 0;
+
+    // Update Quests - TOTAL_CORRECT & TOPIC
+    if (isCorrect) {
+      updateQuestProgress('TOTAL_CORRECT', 1);
+      updateQuestProgress('TOPIC_ACCURACY', 1, currentTopicName.current);
+    }
+
+    // Update Quests - STREAK
+    // We handle streak specially because we want to update if current streak > quest progress
+    if (newStreak > gameState.stats.streak) {
+      setQuests(prev => {
+        const updated = prev.map(q => {
+          if (q.type === 'STREAK' && !q.isCompleted && newStreak > q.progress) {
+            const newP = Math.min(q.target, newStreak);
+            return { ...q, progress: newP, isCompleted: newP >= q.target };
+          }
+          return q;
+        });
+        const today = new Date().toISOString().split('T')[0];
+        localStorage.setItem(`battlenotes_quests_${today}`, JSON.stringify(updated));
+        return updated;
+      });
+    }
+
     const turnStats = recordTurnResult(
       currentTopicName.current,
       isCorrect,
@@ -481,6 +620,21 @@ const App: React.FC = () => {
           onStartRaid={(friends) => handleStartGame('COOP', friends)}
           onBack={() => setView('MENU')}
         />
+      ) : view === 'COMPETITION_SETUP' ? (
+        <CompetitionSetup
+          onGameStart={handleCompetitionStart}
+          onBack={() => setView('MENU')}
+          multiplayer={multiplayer}
+        />
+      ) : view === 'COMPETITION_GAME' && competitionRoom && gameState ? (
+        <CompetitionGameScreen
+          roomState={competitionRoom}
+          gameState={gameState}
+          allTurns={competitionTurns.current}
+          onGameEnd={handleCompetitionEnd}
+          onBack={() => setView('MENU')}
+          multiplayer={multiplayer}
+        />
       ) : view === 'MENU' ? (
         <div className="flex items-center justify-center min-h-screen p-4">
           <div className="w-full max-w-lg">
@@ -498,6 +652,11 @@ const App: React.FC = () => {
               </p>
             </div>
 
+            {/* Menu Buttons Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+              {/* Classic Mode - Occupies full width on mobile, half on desktop */}
+            </div>
+
             <div className="bg-white rounded-[2rem] border-b-8 border-slate-200 p-6 md:p-8 shadow-xl relative transition-all duration-300 ease-out">
               {/* Menu Button & Expanding Buttons */}
               <div className="absolute top-4 right-4 z-50 flex items-center gap-2 pointer-events-auto">
@@ -509,6 +668,13 @@ const App: React.FC = () => {
                     className={`p-2 transition-colors bg-slate-100 rounded-xl disabled:opacity-50 ${soundManager.isSoundEnabled ? 'text-green-500 hover:text-green-600' : 'text-slate-400 hover:text-slate-500'}`}
                   >
                     {soundManager.isSoundEnabled ? <SpeakerWaveIcon className="w-6 h-6" /> : <SpeakerXMarkIcon className="w-6 h-6" />}
+                  </button>
+                  <button
+                    onClick={() => { soundManager.playButtonClick(); setShowQuests(true); setShowSettings(false); setShowMenu(false); }}
+                    disabled={loading}
+                    className="p-2 transition-colors bg-slate-100 rounded-xl disabled:opacity-50 text-slate-400 hover:text-purple-500"
+                  >
+                    <FireIcon className="w-6 h-6" />
                   </button>
                   <button
                     onClick={() => { soundManager.playButtonClick(); setShowStats(true); setShowSettings(false); setShowMenu(false); }}
@@ -557,6 +723,23 @@ const App: React.FC = () => {
                   className="fixed inset-0 z-0"
                   onClick={() => setShowMenu(false)}
                 />
+              )}
+
+              {!showSettings && !showStats && (
+                <div className="mb-6 flex gap-3">
+                  <button
+                    onClick={() => { soundManager.playButtonClick(); handleOpenLobby(); }}
+                    className="flex-1 py-3 bg-purple-500 hover:bg-purple-400 text-white border-b-4 border-purple-700 rounded-xl font-bold text-sm uppercase tracking-wider shadow-lg flex items-center justify-center gap-2 transform active:scale-95 transition-all"
+                  >
+                    <UserGroupIcon className="w-5 h-5" /> Raid
+                  </button>
+                  <button
+                    onClick={() => { soundManager.playButtonClick(); setView('COMPETITION_SETUP'); }}
+                    className="flex-1 py-3 bg-red-500 hover:bg-red-400 text-white border-b-4 border-red-700 rounded-xl font-bold text-sm uppercase tracking-wider shadow-lg flex items-center justify-center gap-2 transform active:scale-95 transition-all"
+                  >
+                    <Swords className="w-5 h-5" /> 1v1 Battle
+                  </button>
+                </div>
               )}
 
               <form onSubmit={(e) => { e.preventDefault(); handleStartGame(); }} className="space-y-6">
