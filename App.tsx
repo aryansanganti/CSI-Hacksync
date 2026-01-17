@@ -1255,14 +1255,14 @@ const GameApp: React.FC = () => {
         </div>
       ) : view === 'MENU' ? (
 
-        <div className="relative flex flex-col justify-end min-h-screen p-4 overflow-hidden pb-12">
+        <div className="relative flex flex-col justify-end min-h-screen p-4 overflow-hidden pb-4">
           {/* Background Image - Fixed & Enhanced */}
           <div className="fixed inset-0 z-0">
             <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/40 to-slate-900/40 z-10" />
             <img
               src="/bg.jpg"
               alt="Background"
-              className="w-full h-full object-cover object-top opacity-100 scale-105"
+              className="w-full h-full object-cover object-[center_25%] opacity-100 scale-100"
             />
           </div>
 
